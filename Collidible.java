@@ -1,7 +1,5 @@
-package asd;
-
 public interface Collidible {
-	private GameObject[] collisions;
-	public boolean IsColliding();
-	public void UpdateCollisions();
+	public boolean IsColliding(GameObject obj);
+	public void UpdateCollisions(GameObject obj);
+	public int Distancia(GameObject obj);
 }
