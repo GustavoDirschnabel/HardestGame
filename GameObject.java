@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import javax.swing.ImageIcon;
 
 public abstract class GameObject implements Collidible {
-	private Dimension bounds;
-	private ArrayList<GameObject> collisions; 
-	private int pox,poy;
-	private ImageIcon sprite;
+	protected Dimension bounds;
+	protected ArrayList<GameObject> collisions; 
+	protected int pox,poy;
+	protected ImageIcon sprite;
 	public GameObject(int pox, int poy, String fileName) {
 		this.sprite = new ImageIcon(fileName);
 		this.bounds = new Dimension(sprite.getIconWidth(),sprite.getIconHeight());
