@@ -6,7 +6,7 @@ public class Player extends GameObject {
 	private int points;
 	private TranslateTransition movimento;
 	private int velocidade;
-	public Player(Shape shape, Double x, Double y) {
+	public Player(Shape shape, double x, double y) {
 		super(shape, x, y);
 		this.points = 0;
 		this.movimento = new TranslateTransition(Duration.millis(167),this.shape);

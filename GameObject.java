@@ -4,7 +4,7 @@ public abstract class GameObject {
 	protected Shape shape;
 	protected Double iniX;
 	protected Double iniY;
-	public GameObject(Shape shape, Double x, Double y) {
+	public GameObject(Shape shape, double x, double y) {
 		this.shape = shape;
 		this.iniX = x;
 		this.iniY = y;
