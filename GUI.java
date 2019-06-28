@@ -1,5 +1,3 @@
-import java.util.ArrayList;
-
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -24,7 +22,12 @@ public class GUI extends Application{
 	private Scene menuScene,gameScene;
 	private Group gameLayout;
 	private GridPane menuLayout;
-	
+	private Player pl;
+	boolean esquerda = false;
+	boolean direita = false;
+	boolean baixo = false;
+	boolean cima = false;
+	private int velocidade = 5;
 	public static void main(String[] args){
 		launch(args);
 	}
@@ -65,6 +68,7 @@ public class GUI extends Application{
 		gameLayout = new Group();
 		gameScene = new Scene(gameLayout,1366,768);
 		gameScene.setOnKeyPressed(kHandler);
+		gameScene.setOnKeyReleased(kHandler);
 		primaryStage.show();
 		
 		double[] wallPoints = {
@@ -86,21 +90,27 @@ public class GUI extends Application{
 		
 		Rectangle rekt = new Rectangle(50,50);
 		rekt.setFill(Color.FIREBRICK);
-		Player pl = new Player(rekt,300,500);
+		pl = new Player(rekt,300,500,0);
 		gameLayout.getChildren().add(pl.getShape());
-		ArrayList<Wall> wall0 = new ArrayList<Wall>();
-		wall0.add(zaWall);
-		
-		ArrayList<Coin> coin0 = new ArrayList<Coin>();
-		ArrayList<Enemy> enemy0 = new ArrayList<Enemy>();
-		
-		Level level0 = new Level(0,pl,enemy0,wall0,coin0);
-		SerializedSave save = new SerializedSave();
-		save.openFile();
-		save.addLevel(level0);
-		save.closeFile();
 	}
-
+	public void move() {
+		if(cima) {
+			pl.shape.setTranslateY(pl.shape.getTranslateY() - velocidade);
+			pl.shape.translateYProperty();
+		}
+		if(baixo) {
+			pl.shape.setTranslateY(pl.shape.getTranslateY() + velocidade);
+			pl.shape.translateYProperty();
+		}
+		if(esquerda) {
+			pl.shape.setTranslateX(pl.shape.getTranslateX() - velocidade);
+			pl.shape.translateXProperty();
+		}
+		if(direita) {
+			pl.shape.setTranslateX(pl.shape.getTranslateX() + velocidade);
+			pl.shape.translateXProperty();
+		}
+	}
 	private class ButtonHandler implements EventHandler<ActionEvent>{
 
 		@Override
@@ -118,19 +128,49 @@ public class GUI extends Application{
 	}
 	
 	private class KeyHandler implements EventHandler<KeyEvent>{
-
 		@Override
-		public void handle(KeyEvent arg0) {
-			if(arg0.getCode() == KeyCode.ESCAPE) {
-				if(primaryStage.getScene() == menuScene) {
-					primaryStage.close();
-				}
-				else if(primaryStage.getScene() == gameScene) {
-					primaryStage.setScene(menuScene);
-				}
-			}
+		public void handle(KeyEvent e) {
+			if(e.getEventType() == KeyEvent.KEY_PRESSED) {
+				if(e.getCode() == KeyCode.ESCAPE) {
+					if(primaryStage.getScene() == menuScene) {
+						primaryStage.close();
+					}
+					else if(primaryStage.getScene() == gameScene) {
+						primaryStage.setScene(menuScene);
+					}
+				}	
 			
-		}
+				if(e.getCode()==KeyCode.LEFT){
+	                esquerda = true;
+	            }
+	            if(e.getCode()==KeyCode.UP){
+	                cima = true;
+	            }
+	            if(e.getCode()==KeyCode.RIGHT){
+	                direita = true;
+	            }
+	            if(e.getCode()==KeyCode.DOWN){
+	                baixo = true;
+	            }
+
+	            move();
+			}
+			if(e.getEventType() == KeyEvent.KEY_RELEASED) {
+				if(e.getCode()==KeyCode.LEFT){
+	                esquerda = false;
+	            }
+	            if(e.getCode()==KeyCode.UP){
+	                cima = false;
+	            }
+	            if(e.getCode()==KeyCode.RIGHT){
+	                direita = false;
+	            }
+	            if(e.getCode()==KeyCode.DOWN){
+	                baixo = false;
+	            }
+	            move();
+			}
+		}	
 		
 	}
 	
