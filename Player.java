@@ -1,8 +1,10 @@
+import java.io.Serializable;
+
 import javafx.animation.TranslateTransition;
 import javafx.scene.shape.Shape;
 import javafx.util.Duration;
 
-public class Player extends GameObject {
+public class Player extends GameObject implements Serializable {
 	private int points;
 	private TranslateTransition movimento;
 	private int velocidade;

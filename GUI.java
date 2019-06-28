@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -86,6 +88,17 @@ public class GUI extends Application{
 		rekt.setFill(Color.FIREBRICK);
 		Player pl = new Player(rekt,300,500);
 		gameLayout.getChildren().add(pl.getShape());
+		ArrayList<Wall> wall0 = new ArrayList<Wall>();
+		wall0.add(zaWall);
+		
+		ArrayList<Coin> coin0 = new ArrayList<Coin>();
+		ArrayList<Enemy> enemy0 = new ArrayList<Enemy>();
+		
+		Level level0 = new Level(0,pl,enemy0,wall0,coin0);
+		SerializedSave save = new SerializedSave();
+		save.openFile();
+		save.addLevel(level0);
+		save.closeFile();
 	}
 
 	private class ButtonHandler implements EventHandler<ActionEvent>{

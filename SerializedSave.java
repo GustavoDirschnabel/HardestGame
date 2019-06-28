@@ -40,7 +40,8 @@ public class SerializedSave {
 		try {
 			output.writeObject(level);
 		} catch (IOException e) {
-			JOptionPane.showMessageDialog(null, "IOException ao salvar levels", "Erro", JOptionPane.ERROR_MESSAGE);
+		//	JOptionPane.showMessageDialog(null, "IOException ao salvar levels", "Erro", JOptionPane.ERROR_MESSAGE);
+			System.err.println(e);
 		}
 	}
 	
