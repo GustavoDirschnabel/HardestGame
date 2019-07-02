@@ -1,5 +1,6 @@
+import java.io.Serializable;
 
-public class Vector2 {
+public class Vector2 implements Serializable {
 	private double posX;
 	private double posY;
 	

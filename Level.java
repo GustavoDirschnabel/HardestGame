@@ -1,6 +1,7 @@
 import java.io.Serializable;
 import java.util.ArrayList;
 
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polyline;
 import javafx.scene.shape.Rectangle;
@@ -19,6 +20,11 @@ public class Level implements Serializable {
 		this.levelNumber = levelNumber;
 		
 		this.posPlayer = new Vector2(player.getIniX(), player.getIniY());
+		this.posEnemies = new ArrayList<Vector2>();
+		this.posWalls = new ArrayList<Vector2>();
+		this.wallPoints = new ArrayList<Double>();
+		this.firstIndexofEachWall = new ArrayList<Integer>();
+		this.posCoins = new ArrayList<Vector2>();
 		
 		for(int i = 0; i < enemies.size(); i ++) {
 			Vector2 pos = new Vector2(enemies.get(i).getIniX(), enemies.get(i).getIniY());
@@ -39,7 +45,7 @@ public class Level implements Serializable {
 				this.wallPoints.add(j + this.firstIndexofEachWall.get(i), pol.getPoints().get(j));
 			}
 			Vector2 pos = new Vector2(wall.get(i).getIniX(), wall.get(i).getIniY());
-			posWalls.set(i, pos);
+			posWalls.add(i, pos);
 		}
 		
 		for(int i = 0; i < coins.size(); i ++) {
@@ -81,6 +87,7 @@ public class Level implements Serializable {
 		    y = posEnemies.get(i).getPosY();
 			circ.setCenterX(x);
 			circ.setCenterY(y);
+			circ.setFill(Color.DARKBLUE);
 			Enemy enemy = new Enemy(circ,x,y);
 			enemies.add(enemy);
 		}
@@ -94,6 +101,34 @@ public class Level implements Serializable {
 
 	public ArrayList<Vector2> getPosWalls() {
 		return posWalls;
+	}
+	
+	public ArrayList<Wall> getWalls(){
+		ArrayList<Wall> walls = new ArrayList<Wall>();
+		ArrayList<Double> points;
+		double[] pointAdapter;
+		double x = 0;
+		double y = 0;
+		
+		for(int i = 0; i < posWalls.size(); i++) {
+			x = posWalls.get(i).getPosX();
+		    y = posWalls.get(i).getPosY();
+		    
+		    if(i != posWalls.size() - 1)
+		    	points = (ArrayList<Double>) wallPoints.subList(firstIndexofEachWall.get(i), firstIndexofEachWall.get(i+1));
+		    else
+		    	points = (ArrayList<Double>) wallPoints.subList(firstIndexofEachWall.get(i), wallPoints.size());
+		    
+		    pointAdapter = new double[points.size()];
+		    for(int j = 0; i < pointAdapter.length; j++) {
+		    	pointAdapter[i] = points.get(i);
+		    }
+		    
+		    Polyline pol = new Polyline(pointAdapter);
+		    walls.add(new Wall(pol,x,y));
+		}
+		
+		return walls;
 	}
 
 	public void setPosWalls(ArrayList<Vector2> posWalls) {
@@ -118,6 +153,25 @@ public class Level implements Serializable {
 
 	public ArrayList<Vector2> getPosCoins() {
 		return posCoins;
+	}
+	
+	public ArrayList<Coin> getCoins() {
+		Circle circ = new Circle(20,0,0);
+		ArrayList<Coin> coins = new ArrayList<Coin>();
+		double x = 0;
+		double y = 0;
+		
+		for(int i = 0; i < posCoins.size(); i++) {
+			x = posCoins.get(i).getPosX();
+		    y = posCoins.get(i).getPosY();
+			circ.setCenterX(x);
+			circ.setCenterY(y);
+			circ.setFill(Color.GOLD);
+			Coin coin = new Coin(circ,x,y);
+			coins.add(coin);
+		}
+		
+		return coins;
 	}
 
 	public void setPosCoins(ArrayList<Vector2> posCoins) {
