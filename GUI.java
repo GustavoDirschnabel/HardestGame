@@ -1,4 +1,9 @@
+import javafx.animation.AnimationTimer;
 import javafx.application.Application;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.LongProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleLongProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
@@ -23,11 +28,29 @@ public class GUI extends Application{
 	private Group gameLayout;
 	private GridPane menuLayout;
 	private Player pl;
-	boolean esquerda = false;
-	boolean direita = false;
-	boolean baixo = false;
-	boolean cima = false;
-	private int velocidade = 5;
+	private final double rectangleSpeedX = 150 ;
+	private final double rectangleSpeedY = 150 ;// pixels per second
+	private final DoubleProperty rectangleVelocityX = new SimpleDoubleProperty();
+	private final DoubleProperty rectangleVelocityY = new SimpleDoubleProperty();
+	private final LongProperty lastUpdateTime = new SimpleLongProperty();
+	private final AnimationTimer rectangleAnimation = new AnimationTimer() {
+	  @Override
+	  public void handle(long timestamp) {
+	    if (lastUpdateTime.get() > 0) {
+	      final double elapsedSeconds = (timestamp - lastUpdateTime.get()) / 1_000_000_000.0 ;
+	      final double deltaX = elapsedSeconds * rectangleVelocityX.get();
+	      final double oldX = pl.getShape().getTranslateX();
+	      final double newX = oldX + deltaX;
+	      final double deltaY = elapsedSeconds * rectangleVelocityY.get();
+	      final double oldY = pl.getShape().getTranslateY();
+	      final double newY = oldY + deltaY;
+	      pl.getShape().setTranslateX(newX);
+	      pl.getShape().setTranslateY(newY);
+	    }
+	    lastUpdateTime.set(timestamp);
+	  }
+	};
+	
 	public static void main(String[] args){
 		launch(args);
 	}
@@ -37,7 +60,6 @@ public class GUI extends Application{
 		// TODO Auto-generated method stub
 		this.primaryStage = primaryStage;
 		ButtonHandler btnHandler = new ButtonHandler();
-		KeyHandler kHandler = new KeyHandler();
 		
 		start = new Button();
 		start.setText("Start");
@@ -62,13 +84,46 @@ public class GUI extends Application{
 		menuLayout.add(exit, 0, 2);
 		
 		menuScene = new Scene(menuLayout, 1366, 768);
-		menuScene.setOnKeyPressed(kHandler);
+		menuScene.setOnKeyPressed(new EventHandler<KeyEvent>() {
+			@Override
+			public void handle(KeyEvent e) {
+				if(e.getCode() == KeyCode.ESCAPE) {
+						primaryStage.close();
+				}
+			}
+		});
 		primaryStage.setScene(menuScene);
 		
 		gameLayout = new Group();
 		gameScene = new Scene(gameLayout,1366,768);
-		gameScene.setOnKeyPressed(kHandler);
-		gameScene.setOnKeyReleased(kHandler);
+		gameScene.setOnKeyPressed(new EventHandler<KeyEvent>() {
+			  @Override
+			  public void handle(KeyEvent event) {
+				  if (event.getCode()==KeyCode.RIGHT) { // don't use toString here!!!
+					  rectangleVelocityX.set(rectangleSpeedX);
+				  } 
+				  else if (event.getCode() == KeyCode.LEFT) {
+					  rectangleVelocityX.set(-rectangleSpeedX);
+				  } 
+				  else if (event.getCode() == KeyCode.UP) {
+				      rectangleVelocityY.set(-rectangleSpeedY);
+				  }	
+				  else if (event.getCode() == KeyCode.DOWN) {
+				      rectangleVelocityY.set(rectangleSpeedY);
+				   }
+			  }
+		});
+		gameScene.setOnKeyReleased(new EventHandler<KeyEvent>() {
+			  @Override
+			  public void handle(KeyEvent event) {
+				    if (event.getCode() == KeyCode.RIGHT || event.getCode() == KeyCode.LEFT) {
+				      rectangleVelocityX.set(0);
+				    }
+				    if (event.getCode() == KeyCode.UP || event.getCode() == KeyCode.DOWN) {
+					      rectangleVelocityY.set(0);
+				    }
+			  }
+		});
 		primaryStage.show();
 		
 		double[] wallPoints = {
@@ -90,26 +145,9 @@ public class GUI extends Application{
 		
 		Rectangle rekt = new Rectangle(50,50);
 		rekt.setFill(Color.FIREBRICK);
-		pl = new Player(rekt,300,500,0);
+		pl = new Player(rekt,300,500);
 		gameLayout.getChildren().add(pl.getShape());
-	}
-	public void move() {
-		if(cima) {
-			pl.shape.setTranslateY(pl.shape.getTranslateY() - velocidade);
-			pl.shape.translateYProperty();
-		}
-		if(baixo) {
-			pl.shape.setTranslateY(pl.shape.getTranslateY() + velocidade);
-			pl.shape.translateYProperty();
-		}
-		if(esquerda) {
-			pl.shape.setTranslateX(pl.shape.getTranslateX() - velocidade);
-			pl.shape.translateXProperty();
-		}
-		if(direita) {
-			pl.shape.setTranslateX(pl.shape.getTranslateX() + velocidade);
-			pl.shape.translateXProperty();
-		}
+		rectangleAnimation.start();
 	}
 	private class ButtonHandler implements EventHandler<ActionEvent>{
 
@@ -126,54 +164,23 @@ public class GUI extends Application{
 		}
 		
 	}
-	
-	private class KeyHandler implements EventHandler<KeyEvent>{
-		@Override
-		public void handle(KeyEvent e) {
-			if(e.getEventType() == KeyEvent.KEY_PRESSED) {
-				if(e.getCode() == KeyCode.ESCAPE) {
-					if(primaryStage.getScene() == menuScene) {
-						primaryStage.close();
-					}
-					else if(primaryStage.getScene() == gameScene) {
-						primaryStage.setScene(menuScene);
-					}
-				}	
-			
-				if(e.getCode()==KeyCode.LEFT){
-	                esquerda = true;
-	            }
-	            if(e.getCode()==KeyCode.UP){
-	                cima = true;
-	            }
-	            if(e.getCode()==KeyCode.RIGHT){
-	                direita = true;
-	            }
-	            if(e.getCode()==KeyCode.DOWN){
-	                baixo = true;
-	            }
-
-	            move();
-			}
-			if(e.getEventType() == KeyEvent.KEY_RELEASED) {
-				if(e.getCode()==KeyCode.LEFT){
-	                esquerda = false;
-	            }
-	            if(e.getCode()==KeyCode.UP){
-	                cima = false;
-	            }
-	            if(e.getCode()==KeyCode.RIGHT){
-	                direita = false;
-	            }
-	            if(e.getCode()==KeyCode.DOWN){
-	                baixo = false;
-	            }
-	            move();
-			}
-		}	
-		
-	}
-	
-	
-
 }
+
+/*public void move() {
+		if(cima) {
+			pl.shape.setTranslateY(pl.shape.getTranslateY() - velocidade);
+			pl.shape.translateYProperty();
+		}
+		if(baixo) {
+			pl.shape.setTranslateY(pl.shape.getTranslateY() + velocidade);
+			pl.shape.translateYProperty();
+		}
+		if(esquerda) {
+			pl.shape.setTranslateX(pl.shape.getTranslateX() - velocidade);
+			pl.shape.translateXProperty();
+		}
+		if(direita) {
+			pl.shape.setTranslateX(pl.shape.getTranslateX() + velocidade);
+			pl.shape.translateXProperty();
+		}
+	}*/
