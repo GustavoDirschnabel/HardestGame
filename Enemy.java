@@ -10,8 +10,8 @@ public class Enemy extends GameObject implements Serializable {
 		super(shape, x, y);
 		// TODO Auto-generated constructor stub
 	}
-	public void Move(Shape caminho, double duração) {
-		PathTransition mover = new PathTransition(Duration.seconds(duração),caminho,this.shape);
+	public void Move(Shape caminho, double duracao) {
+		PathTransition mover = new PathTransition(Duration.seconds(duracao),caminho,this.shape);
 		mover.setCycleCount(PathTransition.INDEFINITE);
 		mover.play();
 	}

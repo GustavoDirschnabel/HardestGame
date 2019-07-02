@@ -15,9 +15,11 @@ public class Level implements Serializable {
 	private ArrayList<Double> wallPoints;
 	private ArrayList<Integer> firstIndexofEachWall;
 	private ArrayList<Vector2> posCoins;
+	private ArrayList<Vector2> posCheckpoints;
+	private ArrayList<Vector2> checkPointBounds;
 	
 	public Level(int levelNumber, Player player, ArrayList<Enemy> enemies, ArrayList<Wall> wall,
-			ArrayList<Coin> coins) {
+			ArrayList<Coin> coins, ArrayList<CheckPoint> checkpoints) {
 		this.levelNumber = levelNumber;
 		this.numberOfDeaths = player.getDeaths();
 		this.posPlayer = new Vector2(player.getIniX(), player.getIniY());
@@ -26,6 +28,8 @@ public class Level implements Serializable {
 		this.wallPoints = new ArrayList<Double>();
 		this.firstIndexofEachWall = new ArrayList<Integer>();
 		this.posCoins = new ArrayList<Vector2>();
+		this.posCheckpoints = new ArrayList<Vector2>();
+		this.checkPointBounds = new ArrayList<Vector2>();
 		
 		for(int i = 0; i < enemies.size(); i ++) {
 			Vector2 pos = new Vector2(enemies.get(i).getIniX(), enemies.get(i).getIniY());
@@ -51,7 +55,14 @@ public class Level implements Serializable {
 		
 		for(int i = 0; i < coins.size(); i ++) {
 			Vector2 pos = new Vector2(coins.get(i).getIniX(), coins.get(i).getIniY());
-			this.posEnemies.add(i, pos);
+			this.posCoins.add(i, pos);
+		}
+		
+		for(int i = 0; i < checkpoints.size(); i++) {
+			Vector2 pos = new Vector2 (checkpoints.get(i).iniX, checkpoints.get(i).iniY);
+			Vector2 bounds = new Vector2(checkpoints.get(i).getShape().getScaleX(),checkpoints.get(i).getShape().getScaleY());
+			this.posCheckpoints.add(i,pos);
+			this.checkPointBounds.add(i,bounds);
 		}
 	}
 
@@ -115,14 +126,21 @@ public class Level implements Serializable {
 			x = posWalls.get(i).getPosX();
 		    y = posWalls.get(i).getPosY();
 		    
-		    if(i != posWalls.size() - 1)
-		    	points = (ArrayList<Double>) wallPoints.subList(firstIndexofEachWall.get(i), firstIndexofEachWall.get(i+1));
-		    else
-		    	points = (ArrayList<Double>) wallPoints.subList(firstIndexofEachWall.get(i), wallPoints.size());
+		    points = new ArrayList<Double>();
+		    if(i != posWalls.size() - 1) {
+		    	for(int j = firstIndexofEachWall.get(i); j < firstIndexofEachWall.get(i+1); j++) {
+		    		points.add(j,wallPoints.get(j));
+		    	}
+		    }
+		    else {
+		    	for(int j = firstIndexofEachWall.get(i); j < wallPoints.size(); j++) {
+		    		points.add(j,wallPoints.get(j));
+		    	}
+		    }
 		    
 		    pointAdapter = new double[points.size()];
-		    for(int j = 0; i < pointAdapter.length; j++) {
-		    	pointAdapter[i] = points.get(i);
+		    for(int j = 0; j < pointAdapter.length; j++) {
+		    	pointAdapter[j] = points.get(j);
 		    }
 		    
 		    Polyline pol = new Polyline(pointAdapter);
@@ -177,6 +195,52 @@ public class Level implements Serializable {
 
 	public void setPosCoins(ArrayList<Vector2> posCoins) {
 		this.posCoins = posCoins;
+	}
+
+	public ArrayList<Vector2> getPosCheckpoints() {
+		return posCheckpoints;
+	}
+
+	public void setPosCheckpoints(ArrayList<Vector2> posCheckpoints) {
+		this.posCheckpoints = posCheckpoints;
+	}
+
+	public ArrayList<Vector2> getCheckPointBounds() {
+		return checkPointBounds;
+	}
+
+	public void setCheckPointBounds(ArrayList<Vector2> checkPointBounds) {
+		this.checkPointBounds = checkPointBounds;
+	}
+	
+	public ArrayList<CheckPoint> getCheckPoints() {
+		Rectangle rect;
+		ArrayList<CheckPoint> checkpoints = new ArrayList<CheckPoint>();
+		CheckPoint check;
+		double x = 0;
+		double y = 0;
+		
+		for (int i = 0; i < posCheckpoints.size(); i++) {
+			x = posCheckpoints.get(i).getPosX();
+			y = posCheckpoints.get(i).getPosY();
+			rect = new Rectangle(checkPointBounds.get(i).getPosX(), checkPointBounds.get(i).getPosY());
+			if(i == 0) {
+				check = new CheckPoint(rect,x,y,false,true);
+			}
+			else if(i == posCheckpoints.size() - 1) {
+				check = new CheckPoint(rect,x,y,true,false);
+			}
+			else {
+				check = new CheckPoint(rect,x,y,false,false);
+			}
+			
+			checkpoints.add(check);
+		}
+		return checkpoints;
+	}
+
+	public Vector2 getPosPlayer() {
+		return posPlayer;
 	}	
 	
 }
