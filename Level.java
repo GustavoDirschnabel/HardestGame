@@ -8,6 +8,7 @@ import javafx.scene.shape.Rectangle;
 
 public class Level implements Serializable {
 	private int levelNumber;
+	private int numberOfDeaths;
 	private Vector2 posPlayer;
 	private ArrayList<Vector2> posEnemies;
 	private ArrayList<Vector2> posWalls;
@@ -18,7 +19,7 @@ public class Level implements Serializable {
 	public Level(int levelNumber, Player player, ArrayList<Enemy> enemies, ArrayList<Wall> wall,
 			ArrayList<Coin> coins) {
 		this.levelNumber = levelNumber;
-		
+		this.numberOfDeaths = player.getDeaths();
 		this.posPlayer = new Vector2(player.getIniX(), player.getIniY());
 		this.posEnemies = new ArrayList<Vector2>();
 		this.posWalls = new ArrayList<Vector2>();
@@ -65,7 +66,7 @@ public class Level implements Serializable {
 
 	public Player getPlayer() {
 		Rectangle rect = new Rectangle(50,50);
-		return new Player(rect,this.posPlayer.getPosX(), this.posPlayer.getPosY());
+		return new Player(rect,this.posPlayer.getPosX(), this.posPlayer.getPosY(),this.numberOfDeaths);
 	}
 
 	public void setPosPlayer(Vector2 posPlayer) {
