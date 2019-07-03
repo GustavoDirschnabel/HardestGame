@@ -3,14 +3,19 @@ import java.util.ArrayList;
 
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Ellipse;
 import javafx.scene.shape.Polyline;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.Shape;
 
 public class Level implements Serializable {
 	private int levelNumber;
 	private int numberOfDeaths;
 	private Vector2 posPlayer;
 	private ArrayList<Vector2> posEnemies;
+	private ArrayList<Integer> enemyPathType;
+	private ArrayList<Double> enemyPathPoints;
+	private ArrayList<Integer> firstIndexofEachEnemyPath;
 	private ArrayList<Vector2> posWalls;
 	private ArrayList<Double> wallPoints;
 	private ArrayList<Integer> firstIndexofEachWall;
@@ -30,20 +35,76 @@ public class Level implements Serializable {
 		this.posCoins = new ArrayList<Vector2>();
 		this.posCheckpoints = new ArrayList<Vector2>();
 		this.checkPointBounds = new ArrayList<Vector2>();
+		this.enemyPathPoints = new ArrayList<Double>();
+		this.enemyPathType = new ArrayList<Integer>();
+		this.firstIndexofEachEnemyPath = new ArrayList<Integer>();
 		
 		for(int i = 0; i < enemies.size(); i ++) {
 			Vector2 pos = new Vector2(enemies.get(i).getIniX(), enemies.get(i).getIniY());
 			this.posEnemies.add(i, pos);
+			
+			Shape enePath = enemies.get(i).getPath();
+			int index = 0;
+			if(i != 0) {
+				Shape previousEnePath = enemies.get(i - 1).getPath();
+				index += this.firstIndexofEachEnemyPath.get(i - 1);
+				switch(previousEnePath.getClass().getName()) {
+					case "javafx.scene.shape.Rectangle":
+						index += 2;
+						break;
+					case "javafx.scene.shape.Circle":
+						index += 1;
+						break;
+					case "javafx.scene.shape.Ellipse":
+						index += 2;
+						break;
+					case "javafx.scene.shape.Polyline":
+						Polyline previousEnePathAdapter = (Polyline) previousEnePath;
+						index += previousEnePathAdapter.getPoints().size();
+						break;
+					default:
+						System.err.println("Um Caminho de um Enemy não foi detectado corretamente!");
+				}
+			}
+			
+			this.firstIndexofEachEnemyPath.add(i,index);
+			
+			switch(enePath.getClass().getName()) {
+				case "javafx.scene.shape.Rectangle":
+					this.enemyPathType.add(i, ShapeTypes.RECTANGLE);
+					Rectangle path = (Rectangle) enemies.get(i).getPath();
+					this.enemyPathPoints.add(this.firstIndexofEachEnemyPath.get(i),path.getWidth());
+					this.enemyPathPoints.add(this.firstIndexofEachEnemyPath.get(i) + 1,path.getHeight());
+					break;
+				case "javafx.scene.shape.Circle":
+					this.enemyPathType.add(i, ShapeTypes.RECTANGLE);
+					Circle path2 = (Circle) enemies.get(i).getPath();
+					this.enemyPathPoints.add(this.firstIndexofEachEnemyPath.get(i),path2.getRadius());
+					break;
+				case "javafx.scene.shape.Ellipse":
+					this.enemyPathType.add(i, ShapeTypes.ELLIPSE);
+					Ellipse path3 = (Ellipse) enemies.get(i).getPath();
+					this.enemyPathPoints.add(this.firstIndexofEachEnemyPath.get(i),path3.getRadiusX());
+					this.enemyPathPoints.add(this.firstIndexofEachEnemyPath.get(i) + 1,path3.getRadiusY());
+					break;
+				case "javafx.scene.shape.Polyline":
+					this.enemyPathType.add(i, ShapeTypes.POLYLINE);
+					Polyline path4 = (Polyline) enemies.get(i).getPath();
+					for(int n = 0; n < path4.getPoints().size(); n++) {
+						this.enemyPathPoints.add(this.firstIndexofEachEnemyPath.get(i) + n, path4.getPoints().get(n));
+					}
+					break;
+				default:
+					System.err.println("Falha ao compactar Caminhos dos inimigos");
+			}
 		}
 		
 		for(int i = 0; i < wall.size(); i ++) {
 			Polyline pol = (Polyline) wall.get(i).getShape();
 			int index = 0;
-			for(int j = 0; j < i; j++) {
-				index += firstIndexofEachWall.get(j);
-				if(j == i - 1) {
-					index += pol.getPoints().size();
-				}
+			if(i != 0) {
+				Polyline previousPol = (Polyline) wall.get(i - 1).getShape();
+				index = firstIndexofEachWall.get(i-1) + previousPol.getPoints().size();
 			}
 			this.firstIndexofEachWall.add(i,index);
 			for(int j = 0; j < pol.getPoints().size(); j++) {
@@ -89,7 +150,7 @@ public class Level implements Serializable {
 	}
 	
 	public ArrayList<Enemy> getEnemies(){
-		Circle circ = new Circle(0,0,25);
+		Circle circ = new Circle(0,0,15);
 		ArrayList<Enemy> enemies = new ArrayList<Enemy>();
 		double x = 0;
 		double y = 0;
@@ -100,7 +161,42 @@ public class Level implements Serializable {
 			circ.setCenterX(x);
 			circ.setCenterY(y);
 			circ.setFill(Color.DARKBLUE);
-			Enemy enemy = new Enemy(circ,x,y);
+			circ.setStroke(Color.BLACK);
+			
+			Enemy enemy = new Enemy(circ,null,x,y);
+			int dataPos = this.firstIndexofEachEnemyPath.get(i);
+			switch(this.enemyPathType.get(i)) {
+				case ShapeTypes.RECTANGLE:
+					Rectangle path1 = new Rectangle(this.enemyPathPoints.get(dataPos), this.enemyPathPoints.get(dataPos + 1));
+					enemy.setPath(path1);
+					break;
+				case ShapeTypes.CIRCLE:
+					Circle path2 = new Circle(this.enemyPathPoints.get(dataPos));
+					enemy.setPath(path2);
+					break;
+				case ShapeTypes.ELLIPSE:
+					Ellipse path3 = new Ellipse(this.enemyPathPoints.get(dataPos),this.enemyPathPoints.get(dataPos + 1));
+					enemy.setPath(path3);
+					break;
+				case ShapeTypes.POLYLINE:
+					double[] path4Points;
+					if(i == posEnemies.size() - 1)
+						path4Points = new double[this.enemyPathPoints.size() - this.firstIndexofEachEnemyPath.get(i)];
+					else
+						path4Points = new double[this.firstIndexofEachEnemyPath.get(i+ 1) - this.firstIndexofEachEnemyPath.get(i)];
+					
+					for(int n = 0; n < path4Points.length; n++) {
+						path4Points[n] = this.enemyPathPoints.get(firstIndexofEachEnemyPath.get(i) + n);
+					}
+					
+					Polyline path4 = new Polyline(path4Points);
+					enemy.setPath(path4);
+					break;
+				default:
+					System.err.println("Não foi possível resgatar o caminho do inimigo");
+					
+			}
+			
 			enemies.add(enemy);
 		}
 		
@@ -214,16 +310,26 @@ public class Level implements Serializable {
 	}
 	
 	public ArrayList<CheckPoint> getCheckPoints() {
-		Rectangle rect;
+		Rectangle rect = new Rectangle(0,0);
+		rect.setFill(Color.DARKSEAGREEN);
+		rect.setStroke(Color.DARKGREEN);
+		rect.setOpacity(0.5);
 		ArrayList<CheckPoint> checkpoints = new ArrayList<CheckPoint>();
 		CheckPoint check;
 		double x = 0;
 		double y = 0;
+		double w = 0;
+		double h = 0;
 		
 		for (int i = 0; i < posCheckpoints.size(); i++) {
 			x = posCheckpoints.get(i).getPosX();
 			y = posCheckpoints.get(i).getPosY();
-			rect = new Rectangle(checkPointBounds.get(i).getPosX(), checkPointBounds.get(i).getPosY());
+			w = checkPointBounds.get(i).getPosX();
+			h = checkPointBounds.get(i).getPosY();
+			
+			rect.setWidth(w);
+			rect.setHeight(h);
+			
 			if(i == 0) {
 				check = new CheckPoint(rect,x,y,false,true);
 			}
