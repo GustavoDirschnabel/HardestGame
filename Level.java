@@ -89,7 +89,7 @@ public class Level implements Serializable {
 	}
 	
 	public ArrayList<Enemy> getEnemies(){
-		Circle circ = new Circle(20,0,0);
+		Circle circ = new Circle(0,0,25);
 		ArrayList<Enemy> enemies = new ArrayList<Enemy>();
 		double x = 0;
 		double y = 0;
@@ -175,7 +175,7 @@ public class Level implements Serializable {
 	}
 	
 	public ArrayList<Coin> getCoins() {
-		Circle circ = new Circle(20,0,0);
+		Circle circ = new Circle(0,0,25);
 		ArrayList<Coin> coins = new ArrayList<Coin>();
 		double x = 0;
 		double y = 0;

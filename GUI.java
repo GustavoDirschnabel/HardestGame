@@ -21,6 +21,7 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polyline;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
+import javafx.scene.shape.StrokeType;
 import javafx.stage.Stage;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -56,6 +57,7 @@ public class GUI extends Application {
 				pl.getShape().setTranslateY(newY);
 			}
 			lastUpdateTime.set(timestamp);
+			checkShapeIntersection(pl);
 		}
 	};
 
@@ -107,16 +109,16 @@ public class GUI extends Application {
 			@Override
 			public void handle(KeyEvent event) {
 				if (event.getCode() == KeyCode.RIGHT) { // don't use toString here!!!
-					checkShapeIntersection(pl);
+					
 					rectangleVelocityX.set(rectangleSpeedX);
 				} else if (event.getCode() == KeyCode.LEFT) {
-					checkShapeIntersection(pl);
+					
 					rectangleVelocityX.set(-rectangleSpeedX);
 				} else if (event.getCode() == KeyCode.UP) {
-					checkShapeIntersection(pl);
+					
 					rectangleVelocityY.set(-rectangleSpeedY);
 				} else if (event.getCode() == KeyCode.DOWN) {
-					checkShapeIntersection(pl);
+				
 					rectangleVelocityY.set(rectangleSpeedY);
 				}
 			}
@@ -136,16 +138,25 @@ public class GUI extends Application {
 		double[] wallPoints = { 200, 400, 200, 600, 900, 600, 900, 300, 1100, 300, 1100, 100, 400, 100, 400, 400, 200,
 				400 };
 		Polyline pol = new Polyline(wallPoints);
-		pol.setStrokeWidth(15);
+		pol.setStrokeWidth(20);
 
 		Wall zaWall = new Wall(pol, 200, 100);
 		gameLayout.getChildren().add(zaWall.getShape());
+		
+		Circle circ = new Circle(25);
+		circ.setFill(Color.BLUE);
+		circ.setStroke(Color.BLACK);
+		Enemy eminen = new Enemy(circ,500,400);
+		gameLayout.getChildren().add(eminen.getShape());
 
 		Rectangle rekt = new Rectangle(50, 50);
+		rekt.setStroke(Color.BLACK);
 		rekt.setFill(Color.FIREBRICK);
 		pl = new Player(rekt, 300, 500,0);
 		gameLayout.getChildren().add(pl.getShape());
+		
 		// consertar a condição de verificação do nivel
+		
 		save = new SerializedSave();
 		save.openFileInput();
 		niveis = save.readLevels();
@@ -160,12 +171,12 @@ public class GUI extends Application {
 		for (int i = 0; i < niveis.get(0).getCoins().size(); i++) {
 			nodes.add(niveis.get(0).getCoins().get(i));
 		}
+		
 		/*
 		ArrayList<Wall> tet = new ArrayList<Wall>();
 		tet.add(zaWall);
-		Enemy asd = new Enemy(new Circle(10,10,10),30,30);
 		ArrayList<Enemy> tut = new ArrayList<Enemy>();
-		tut.add(asd);
+		tut.add(eminen);
 		Coin das = new Coin (new Circle(10,10,10),50,50);
 		ArrayList<Coin> tat = new ArrayList<Coin>();
 		tat.add(das);
@@ -177,6 +188,8 @@ public class GUI extends Application {
 		save.addLevel(test);
 		save.closeFile();
 		*/
+		
+		
 		rectangleAnimation.start();
 	}
 
@@ -184,9 +197,11 @@ public class GUI extends Application {
 		for (GameObject static_bloc : nodes) {
 			Shape intersect = Shape.intersect(block.getShape(), static_bloc.getShape());
 			if (intersect.getBoundsInLocal().getWidth() != -1) {
-				if (static_bloc.getClass().toString() == "class Enemy") {
+				System.out.println(static_bloc.getClass().toString());
+				if (static_bloc.getClass().toString().equals("class Enemy")) {
 					pl.getShape().relocate(pl.getIniX(), pl.getIniY());
 					pl.setDeaths(pl.getDeaths()+1);
+					System.out.println("morreu");
 				}else if(static_bloc.getClass().toString() == "class Coin") {
 					pl.setPoints(pl.getPoints()+1);
 					gameLayout.getChildren().remove(static_bloc);
@@ -206,6 +221,7 @@ public class GUI extends Application {
 				stage.close();
 			} else if (arg0.getSource() == start) {
 				primaryStage.setScene(gameScene);
+				
 			}
 
 		}
