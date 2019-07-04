@@ -1,5 +1,7 @@
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Shape;
+import javafx.scene.shape.StrokeType;
 import javafx.util.Duration;
 
 import java.io.Serializable;
@@ -14,6 +16,9 @@ public class Enemy extends GameObject implements Serializable {
 		super(shape, x, y);
 		this.path = path;
 		this.moveDuration = moveDuration;
+		shape.setStroke(Color.BLACK);
+		shape.setStrokeType(StrokeType.INSIDE);
+		shape.setStrokeWidth(5);
 		// TODO Auto-generated constructor stub
 	}
 	public void Move() {

@@ -7,6 +7,7 @@ import javafx.scene.shape.Ellipse;
 import javafx.scene.shape.Polyline;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
+import javafx.scene.shape.StrokeType;
 
 public class Level implements Serializable {
 	private int levelNumber;
@@ -141,7 +142,7 @@ public class Level implements Serializable {
 	
 
 	public Player getPlayer() {
-		Rectangle rect = new Rectangle(25,25);
+		Rectangle rect = new Rectangle(30,30);
 		return new Player(rect,this.posPlayer.getPosX(), this.posPlayer.getPosY(),this.numberOfDeaths);
 	}
 

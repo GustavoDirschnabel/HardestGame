@@ -15,6 +15,7 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
+import javafx.scene.effect.BlendMode;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
@@ -25,6 +26,8 @@ import javafx.scene.shape.Polyline;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import javafx.scene.shape.StrokeType;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -35,7 +38,7 @@ public class GUI extends Application {
 	private Button start, levels, exit;
 	private Button[] levelSelection;
 	private Scene menuScene, gameScene, levelSelectionScene;
-	private TextField testField;
+	private TextField testField,deathCounter,levelCounter;
 	private Group gameLayout;
 	private GridPane menuLayout, levelSelectionLayout;
 	private Enemy eminen;
@@ -85,31 +88,34 @@ public class GUI extends Application {
 		MouseHandler posTester = new MouseHandler();
 
 		start = new Button();
-		start.setText("Start");
+		start.setPrefSize(100, 50);
+		start.setText("START");
 		start.setOnAction(btnHandler);
 
 		levels = new Button();
-		levels.setText("Levels");
+		levels.setPrefSize(100, 50);
+		levels.setText("LEVEL");
 		levels.setOnAction(btnHandler);
 
 		exit = new Button();
-		exit.setText("Exit");
+		exit.setPrefSize(100, 50);
+		exit.setText("EXIT");
 		exit.setOnAction(btnHandler);
 
 		testField = new TextField();
 		testField.setEditable(false);
 
 		menuLayout = new GridPane();
-		menuLayout.setAlignment(Pos.CENTER_LEFT);
+		menuLayout.setAlignment(Pos.CENTER);
 		menuLayout.setVgap(20);
-		menuLayout.setHgap(20);
+		menuLayout.setHgap(40);
 		menuLayout.setPadding(new Insets(25, 25, 25, 25));
 
 		menuLayout.add(start, 0, 0);
-		menuLayout.add(levels, 0, 1);
-		menuLayout.add(exit, 0, 2);
+		menuLayout.add(levels, 1, 0);
+		menuLayout.add(exit, 2, 0);
 
-		menuScene = new Scene(menuLayout, 1366, 768);
+		menuScene = new Scene(menuLayout, 1366, 700);
 		menuScene.setOnKeyPressed(new EventHandler<KeyEvent>() {
 			@Override
 			public void handle(KeyEvent e) {
@@ -139,8 +145,33 @@ public class GUI extends Application {
 		levelSelectionLayout.add(levelSelection[2], 2, 0);
 		levelSelectionLayout.add(levelSelection[3], 3, 0);
 		levelSelectionLayout.add(levelSelection[4], 4, 0);
+		levelSelectionLayout.setOnKeyPressed(new EventHandler<KeyEvent>() {
+			@Override
+			public void handle(KeyEvent e) {
+				if (e.getCode() == KeyCode.ESCAPE) {
+					primaryStage.setScene(menuScene);
+				}
+			}
+		});
 		
 		levelSelectionScene = new Scene(levelSelectionLayout,1366, 700);
+		
+
+		deathCounter = new TextField("MORTES:");
+		deathCounter.setFont(Font.font("Impact", 36));
+		deathCounter.setStyle("-fx-text-inner-color: black;");
+		deathCounter.setEditable(false);
+		deathCounter.setBackground(null);
+		deathCounter.setLayoutX(1100);
+		deathCounter.setLayoutY(-10);
+		
+		levelCounter = new TextField(0+"/"+5);
+		levelCounter.setFont(Font.font("Impact", 36));
+		levelCounter.setStyle("-fx-text-inner-color: black;");
+		levelCounter.setEditable(false);
+		levelCounter.setBackground(null);
+		levelCounter.setLayoutX(600);
+		levelCounter.setLayoutY(-10);
 		
 		gameLayout = new Group();
 		gameScene = new Scene(gameLayout, 1366, 768, Color.DARKGRAY);
@@ -211,6 +242,9 @@ public class GUI extends Application {
 			}
 		});
 		gameLayout.getChildren().add(testField);
+		gameLayout.getChildren().add(deathCounter);
+		gameLayout.getChildren().add(levelCounter);
+		
 		primaryStage.show();
 		double[] wallPoints = { 50, 400, 50, 600, 1000, 600, 1000, 300, 1200, 300, 1200, 100, 250, 100, 250, 400, 50,
 				400 };
@@ -295,7 +329,7 @@ public class GUI extends Application {
 					pl.getShape().setTranslateX(0);
 					pl.getShape().setTranslateY(0);
 					pl.setDeaths(pl.getDeaths() + 1);
-					System.out.println("morreu");
+					deathCounter.setText("MORTES: "+pl.getDeaths());
 				} else if (static_bloc.getClass().toString() == "class Coin") {
 					pl.setPoints(pl.getPoints() + 1);
 					gameLayout.getChildren().remove(static_bloc);
@@ -448,12 +482,15 @@ public class GUI extends Application {
 				Stage stage = (Stage) exit.getScene().getWindow();
 				stage.close();
 			} else if (arg0.getSource() == start) {
+				loadLevel(0);
 				primaryStage.setScene(gameScene);
 			}
 			else if (arg0.getSource() == levels) {
 				primaryStage.setScene(levelSelectionScene);
 			}
 			else if (arg0.getSource() == levelSelection[0]) {
+				loadLevel(0);
+				primaryStage.setScene(gameScene);
 			}
 		}
 
