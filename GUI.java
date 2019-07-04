@@ -1,6 +1,8 @@
+import java.awt.Event;
 import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
+import javax.swing.event.HyperlinkEvent.EventType;
 
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
@@ -12,6 +14,7 @@ import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
@@ -84,22 +87,39 @@ public class GUI extends Application {
 	public void start(Stage primaryStage) throws Exception {
 		// TODO Auto-generated method stub
 		this.primaryStage = primaryStage;
+		primaryStage.setTitle("Hardest Game");
 		ButtonHandler btnHandler = new ButtonHandler();
-		MouseHandler posTester = new MouseHandler();
+		MouseHandlerTest posTester = new MouseHandlerTest();
+		MouseHandler mHandler = new MouseHandler();
 
 		start = new Button();
-		start.setPrefSize(100, 50);
+		start.setPrefSize(150, 50);
 		start.setText("START");
+		start.setFont(Font.font("Impact", 36));
+		start.setStyle("-fx-text-fill: black;");
+		start.setBackground(null);
+		start.setOnMouseEntered(mHandler);
+		start.setOnMouseExited(mHandler);
 		start.setOnAction(btnHandler);
 
 		levels = new Button();
-		levels.setPrefSize(100, 50);
-		levels.setText("LEVEL");
+		levels.setPrefSize(150, 50);
+		levels.setText("LEVELS");
+		levels.setFont(Font.font("Impact", 36));
+		levels.setStyle("-fx-text-fill: black;");
+		levels.setBackground(null);
+		levels.setOnMouseEntered(mHandler);
+		levels.setOnMouseExited(mHandler);
 		levels.setOnAction(btnHandler);
 
 		exit = new Button();
-		exit.setPrefSize(100, 50);
+		exit.setPrefSize(150, 50);
 		exit.setText("EXIT");
+		exit.setFont(Font.font("Impact", 36));
+		exit.setStyle("-fx-text-fill: black;");
+		exit.setBackground(null);
+		exit.setOnMouseEntered(mHandler);
+		exit.setOnMouseExited(mHandler);
 		exit.setOnAction(btnHandler);
 
 		testField = new TextField();
@@ -109,7 +129,6 @@ public class GUI extends Application {
 		menuLayout.setAlignment(Pos.CENTER);
 		menuLayout.setVgap(20);
 		menuLayout.setHgap(40);
-		menuLayout.setPadding(new Insets(25, 25, 25, 25));
 
 		menuLayout.add(start, 0, 0);
 		menuLayout.add(levels, 1, 0);
@@ -129,15 +148,18 @@ public class GUI extends Application {
 		levelSelectionLayout = new GridPane();
 		levelSelectionLayout.setAlignment(Pos.CENTER);
 		levelSelectionLayout.setVgap(20);
-		levelSelectionLayout.setHgap(20);
-		levelSelectionLayout.setPadding(new Insets(10,10,10,10));
+		levelSelectionLayout.setHgap(30);
 		
 		levelSelection = new Button[5];
 		for(Integer i = 0; i < levelSelection.length; i++) {
 			levelSelection[i] = new Button();
 			levelSelection[i].setText(String.valueOf(i+1));
-			levelSelection[i].setMinSize(60, 60);
-			levelSelection[i].setPrefSize(100, 100);
+			levelSelection[i].setPrefSize(50, 50);
+			levelSelection[i].setFont(Font.font("Impact", 36));
+			levelSelection[i].setStyle("-fx-text-fill: black;");
+			levelSelection[i].setBackground(null);
+			levelSelection[i].setOnMouseEntered(mHandler);
+			levelSelection[i].setOnMouseExited(mHandler);
 			levelSelection[i].setOnAction(btnHandler);
 		}
 		levelSelectionLayout.add(levelSelection[0], 0, 0);
@@ -464,12 +486,24 @@ public class GUI extends Application {
 		
 	}
 
-	private class MouseHandler implements EventHandler<MouseEvent> {
+	private class MouseHandler implements EventHandler<MouseEvent>{
+		@Override
+		public void handle(MouseEvent e) {	
+			if(e.getEventType() == MouseEvent.MOUSE_ENTERED ) {
+				((Node) e.getSource()).setStyle("-fx-text-fill: blue;");
+			}else if(e.getEventType() == MouseEvent.MOUSE_EXITED) {
+				((Node) e.getSource()).setStyle("-fx-text-fill: black;");
+			}
+		}
+	}
+		
+	
+	
+	private class MouseHandlerTest implements EventHandler<MouseEvent> {
 
 		@Override
 		public void handle(MouseEvent arg0) {
 			testField.setText("X: " + arg0.getX() + "\tY: " + arg0.getY());
-
 		}
 
 	}
