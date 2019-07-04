@@ -46,6 +46,7 @@ public class GUI extends Application {
 	private Polyline path;
 	private Rectangle path2;
 	private Player pl;
+	private Level nivelAtual;
 	private ArrayList<CheckPoint> levelCheckpoints;
 	private ArrayList<Coin> levelCoins;
 	private ArrayList<Integer> savedCoins, unsavedCoins;
@@ -287,6 +288,9 @@ public class GUI extends Application {
 		path2 = new Rectangle(500,400,300, 0);
 		eminen = new Enemy(circ, path2, 500, 400, 2);
 		//gameLayout.getChildren().add(eminen.getShape());
+		save = new SerializedSave();
+		save.openFileInput();
+		niveis = save.readLevels();
 		currentLevel = 0;
 		loadLevel(currentLevel);
 		gameLayout.requestFocus();
@@ -479,7 +483,7 @@ public class GUI extends Application {
 				}
 				else if (static_bloc.getClass().toString().equals("class CheckPoint")) {
 					CheckPoint hitCheck = (CheckPoint) static_bloc;
-					if (hitCheck.isFinishLine() && pl.getPoints() == niveis.get(currentLevel).getCoins().size()) {
+					if (hitCheck.isFinishLine() && pl.getPoints() == nivelAtual.getCoins().size()) {
 						if(currentLevel == niveis.size() - 1) {
 							primaryStage.setScene(menuScene);
 							currentLevel = 0;
@@ -491,7 +495,7 @@ public class GUI extends Application {
 						}
 					}
 					else if(!hitCheck.isActivated()) {
-						for(int i = 1; i < niveis.get(currentLevel).getCheckPoints().size(); i++) {
+						for(int i = 1; i < nivelAtual.getCheckPoints().size(); i++) {
 							if(!levelCheckpoints.get(i).isActivated()) {
 							   levelCheckpoints.get(i).setActivated(true);
 							   break;
@@ -512,42 +516,44 @@ public class GUI extends Application {
 	}
 	
 	public void loadLevel(int levelNumber) {
-		
 		gameLayout.getChildren().remove(3, gameLayout.getChildren().size());
-		save = new SerializedSave();
-		save.openFileInput();
-		niveis = save.readLevels();
+		for(int i = 0; i < niveis.size(); i++) {
+			if(niveis.get(i).getLevelNumber() == levelNumber) {
+				nivelAtual = niveis.get(i);
+				break;
+			}
+		}
 		System.out.println(niveis.size());
 		save.closeFile();
 		nodes = new ArrayList<GameObject>();
-		levelCheckpoints = niveis.get(levelNumber).getCheckPoints();
-		levelCoins = niveis.get(levelNumber).getCoins();
+		levelCheckpoints = nivelAtual.getCheckPoints();
+		levelCoins = nivelAtual.getCoins();
 		savedCoins = new ArrayList<Integer>();
 		unsavedCoins = new ArrayList<Integer>();
-		for (int i = 0; i < niveis.get(levelNumber).getWalls().size(); i++) {
-			nodes.add(niveis.get(levelNumber).getWalls().get(i));
-			Shape walle = niveis.get(levelNumber).getWalls().get(i).getShape();
+		for (int i = 0; i < nivelAtual.getWalls().size(); i++) {
+			nodes.add(nivelAtual.getWalls().get(i));
+			Shape walle = nivelAtual.getWalls().get(i).getShape();
 			walle.setFill(Color.WHITE);
 			gameLayout.getChildren().add(walle);
 			
 		}
-		for (int i = 0; i < niveis.get(levelNumber).getEnemies().size(); i++) {
-			eminen = niveis.get(levelNumber).getEnemies().get(i);
+		for (int i = 0; i < nivelAtual.getEnemies().size(); i++) {
+			eminen = nivelAtual.getEnemies().get(i);
 			nodes.add(eminen);
 			gameLayout.getChildren().add(eminen.getShape());
 		}
-		for (int i = 0; i < niveis.get(levelNumber).getCoins().size(); i++) {
+		for (int i = 0; i < nivelAtual.getCoins().size(); i++) {
 			nodes.add(levelCoins.get(i));
 			gameLayout.getChildren().add(levelCoins.get(i).getShape());
 		}
-		for (int i = 0; i < niveis.get(levelNumber).getCheckPoints().size(); i++) {
+		for (int i = 0; i < nivelAtual.getCheckPoints().size(); i++) {
 			nodes.add(levelCheckpoints.get(i));
 			//System.out.println(levelCheckpoints.get(i).getShape().getLayoutX());
 			gameLayout.getChildren().add(levelCheckpoints.get(i).getShape());
 		}
 		
 		
-		pl = niveis.get(levelNumber).getPlayer();
+		pl = nivelAtual.getPlayer();
 		pl.setPoints(0);
 		rectangleVelocityX.set(0);
 		rectangleVelocityY.set(0);
