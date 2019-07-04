@@ -189,7 +189,7 @@ public class GUI extends Application {
 		deathCounter.setLayoutX(1100);
 		deathCounter.setLayoutY(-10);
 		
-		levelCounter = new TextField(0+"/"+5);
+		levelCounter = new TextField(currentLevel + 1 +"/"+5);
 		levelCounter.setFont(Font.font("Impact", 36));
 		levelCounter.setStyle("-fx-text-inner-color: black;");
 		levelCounter.setEditable(false);
