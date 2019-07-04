@@ -33,10 +33,11 @@ public class GUI extends Application {
 
 	private Stage primaryStage;
 	private Button start, levels, exit;
-	private Scene menuScene, gameScene;
+	private Button[] levelSelection;
+	private Scene menuScene, gameScene, levelSelectionScene;
 	private TextField testField;
 	private Group gameLayout;
-	private GridPane menuLayout;
+	private GridPane menuLayout, levelSelectionLayout;
 	private Enemy eminen;
 	private Polyline path;
 	private Rectangle path2;
@@ -51,6 +52,7 @@ public class GUI extends Application {
 	private final DoubleProperty rectangleVelocityX = new SimpleDoubleProperty();
 	private final DoubleProperty rectangleVelocityY = new SimpleDoubleProperty();
 	private final LongProperty lastUpdateTime = new SimpleLongProperty();
+
 	private final AnimationTimer rectangleAnimation = new AnimationTimer() {
 		@Override
 		public void handle(long timestamp) {
@@ -88,6 +90,7 @@ public class GUI extends Application {
 
 		levels = new Button();
 		levels.setText("Levels");
+		levels.setOnAction(btnHandler);
 
 		exit = new Button();
 		exit.setText("Exit");
@@ -117,6 +120,28 @@ public class GUI extends Application {
 		});
 		primaryStage.setScene(menuScene);
 
+		levelSelectionLayout = new GridPane();
+		levelSelectionLayout.setAlignment(Pos.CENTER);
+		levelSelectionLayout.setVgap(20);
+		levelSelectionLayout.setHgap(20);
+		levelSelectionLayout.setPadding(new Insets(10,10,10,10));
+		
+		levelSelection = new Button[5];
+		for(Integer i = 0; i < levelSelection.length; i++) {
+			levelSelection[i] = new Button();
+			levelSelection[i].setText(String.valueOf(i+1));
+			levelSelection[i].setMinSize(60, 60);
+			levelSelection[i].setPrefSize(100, 100);
+			levelSelection[i].setOnAction(btnHandler);
+		}
+		levelSelectionLayout.add(levelSelection[0], 0, 0);
+		levelSelectionLayout.add(levelSelection[1], 1, 0);
+		levelSelectionLayout.add(levelSelection[2], 2, 0);
+		levelSelectionLayout.add(levelSelection[3], 3, 0);
+		levelSelectionLayout.add(levelSelection[4], 4, 0);
+		
+		levelSelectionScene = new Scene(levelSelectionLayout,1366, 700);
+		
 		gameLayout = new Group();
 		gameScene = new Scene(gameLayout, 1366, 768, Color.DARKGRAY);
 		gameScene.setOnMouseMoved(posTester);
@@ -147,8 +172,8 @@ public class GUI extends Application {
 						movingDown = true;
 						movingUp = false;
 					}
-				} else if (event.getCode() == KeyCode.ENTER) {
-					eminen.Move(2);
+				} else if (event.getCode() == KeyCode.ESCAPE) {
+					primaryStage.setScene(menuScene);
 				}
 			}
 		});
@@ -194,16 +219,17 @@ public class GUI extends Application {
 		pol.setFill(Color.WHITE);
 
 		Wall zaWall = new Wall(pol, 100, 100);
-		gameLayout.getChildren().add(zaWall.getShape());
+		//gameLayout.getChildren().add(zaWall.getShape());
 
 		Circle circ = new Circle(15);
 		circ.setFill(Color.BLUE);
 		circ.setStroke(Color.BLACK);
 		double[] pathPoints = { 0, 100, 300, 0, 0, 0 };
 		path = new Polyline(pathPoints);
-		path2 = new Rectangle(300, 0);
-		eminen = new Enemy(circ, path2, 500, 400);
-		gameLayout.getChildren().add(eminen.getShape());
+		path2 = new Rectangle(500,400,300, 0);
+		eminen = new Enemy(circ, path2, 500, 400, 2);
+		//gameLayout.getChildren().add(eminen.getShape());
+		loadLevel(0);
 		gameLayout.requestFocus();
 
 		/*
@@ -223,8 +249,8 @@ public class GUI extends Application {
 		Rectangle rekt = new Rectangle(30, 30);
 		rekt.setStroke(Color.BLACK);
 		rekt.setFill(Color.FIREBRICK);
-		pl = new Player(rekt, 300, 500, 0);
-
+		//pl = new Player(rekt, 300, 500, 0);
+		
 		Rectangle checkS = new Rectangle(200, 200);
 		checkS.setFill(Color.DARKSEAGREEN);
 		checkS.setStroke(Color.DARKGREEN);
@@ -236,42 +262,27 @@ public class GUI extends Application {
 		CheckPoint check1 = new CheckPoint(checkS, 100, 400, false, true);
 		CheckPoint check2 = new CheckPoint(checkR, 1050, 100, true, false);
 
-		gameLayout.getChildren().add(check1.getShape());
-		gameLayout.getChildren().add(check2.getShape());
-		gameLayout.getChildren().add(pl.getShape());
+		//gameLayout.getChildren().add(check1.getShape());
+		//gameLayout.getChildren().add(check2.getShape());
+		//gameLayout.getChildren().add(pl.getShape());
 
-		// consertar a condição de verificação do nivel
 
-		save = new SerializedSave();
-		save.openFileInput();
-		niveis = save.readLevels();
-		save.closeFile();
-		nodes = new ArrayList<GameObject>();
-		for (int i = 0; i < niveis.get(0).getEnemies().size(); i++) {
-			nodes.add(niveis.get(0).getEnemies().get(i));
-		}
-		for (int i = 0; i < niveis.get(0).getWalls().size(); i++) {
-			nodes.add(niveis.get(0).getWalls().get(i));
-		}
-		for (int i = 0; i < niveis.get(0).getCoins().size(); i++) {
-			nodes.add(niveis.get(0).getCoins().get(i));
-		}
 
 		/*
-		 * ArrayList<Wall> tet = new ArrayList<Wall>(); tet.add(zaWall);
-		 * ArrayList<Enemy> tut = new ArrayList<Enemy>(); tut.add(eminen); Coin das =
-		 * new Coin (new Circle(10,10,10),50,50); ArrayList<Coin> tat = new
-		 * ArrayList<Coin>(); tat.add(das); CheckPoint daimn = new CheckPoint(new
-		 * Circle(10,10,10), 60, 60, false, false); ArrayList<CheckPoint> tit = new
-		 * ArrayList<CheckPoint>(); Level test = new Level(0,pl,tut,tet,tat, tit); save
-		 * = new SerializedSave(); save.openFileOutput(); save.addLevel(test);
-		 * save.closeFile();
+		 ArrayList<Wall> tet = new ArrayList<Wall>(); tet.add(zaWall);
+		 ArrayList<Enemy> tut = new ArrayList<Enemy>(); 
+		 tut.add(eminen); 
+		 Coin das = new Coin (new Circle(10,10,10),50,50); 
+		 ArrayList<Coin> tat = new ArrayList<Coin>(); 
+		 tat.add(das);
+		 CheckPoint daimn = new CheckPoint(new Circle(10,10,10), 60, 60, false, false); 
+		 ArrayList<CheckPoint> tit = new ArrayList<CheckPoint>(); 
+		 Level test = new Level(0,pl,tut,tet,tat, tit); 
+		 save = new SerializedSave(); 
+		 save.openFileOutput(); 
+		 save.addLevel(test);
+		 save.closeFile();
 		 */
-
-		canMoveLeft = true;
-		canMoveRight = true;
-		canMoveUp = true;
-		canMoveDown = true;
 
 		rectangleAnimation.start();
 	}
@@ -384,6 +395,40 @@ public class GUI extends Application {
 			}
 		}
 	}
+	
+	public void loadLevel(int levelNumber) {
+		
+		save = new SerializedSave();
+		save.openFileInput();
+		niveis = save.readLevels();
+		save.closeFile();
+		nodes = new ArrayList<GameObject>();
+		for (int i = 0; i < niveis.get(levelNumber).getWalls().size(); i++) {
+			nodes.add(niveis.get(levelNumber).getWalls().get(i));
+			Shape walle = niveis.get(levelNumber).getWalls().get(i).getShape();
+			walle.setFill(Color.WHITE);
+			gameLayout.getChildren().add(walle);
+			
+		}
+		for (int i = 0; i < niveis.get(levelNumber).getEnemies().size(); i++) {
+			eminen = niveis.get(levelNumber).getEnemies().get(i);
+			nodes.add(eminen);
+			gameLayout.getChildren().add(eminen.getShape());
+		}
+		for (int i = 0; i < niveis.get(levelNumber).getCoins().size(); i++) {
+			nodes.add(niveis.get(levelNumber).getCoins().get(i));
+			gameLayout.getChildren().add(niveis.get(levelNumber).getCoins().get(i).getShape());
+		}
+		for (int i = 0; i < niveis.get(levelNumber).getCheckPoints().size(); i++) {
+			nodes.add(niveis.get(levelNumber).getCheckPoints().get(i));
+			gameLayout.getChildren().add(niveis.get(levelNumber).getCheckPoints().get(i).getShape());
+		}
+		
+		pl = niveis.get(levelNumber).getPlayer();
+		gameLayout.getChildren().add(pl.getShape());
+		
+		
+	}
 
 	private class MouseHandler implements EventHandler<MouseEvent> {
 
@@ -404,9 +449,12 @@ public class GUI extends Application {
 				stage.close();
 			} else if (arg0.getSource() == start) {
 				primaryStage.setScene(gameScene);
-
 			}
-
+			else if (arg0.getSource() == levels) {
+				primaryStage.setScene(levelSelectionScene);
+			}
+			else if (arg0.getSource() == levelSelection[0]) {
+			}
 		}
 
 	}
