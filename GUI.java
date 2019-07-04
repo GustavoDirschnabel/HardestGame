@@ -1,8 +1,6 @@
-import java.awt.Event;
 import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
-import javax.swing.event.HyperlinkEvent.EventType;
 
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
@@ -48,8 +46,12 @@ public class GUI extends Application {
 	private Polyline path;
 	private Rectangle path2;
 	private Player pl;
+	private ArrayList<CheckPoint> levelCheckpoints;
+	private ArrayList<Coin> levelCoins;
+	private ArrayList<Integer> savedCoins, unsavedCoins;
 	private final double collisionTolerance = 0.45;
 	private boolean canMoveLeft, canMoveRight, canMoveUp, canMoveDown, movingLeft, movingRight, movingUp, movingDown;
+	private int currentLevel;
 	private SerializedSave save;
 	private ArrayList<Level> niveis;
 	private ArrayList<GameObject> nodes;
@@ -134,7 +136,7 @@ public class GUI extends Application {
 		menuLayout.add(levels, 1, 0);
 		menuLayout.add(exit, 2, 0);
 
-		menuScene = new Scene(menuLayout, 1366, 700);
+		menuScene = new Scene(menuLayout, 1280, 720);
 		menuScene.setOnKeyPressed(new EventHandler<KeyEvent>() {
 			@Override
 			public void handle(KeyEvent e) {
@@ -148,7 +150,7 @@ public class GUI extends Application {
 		levelSelectionLayout = new GridPane();
 		levelSelectionLayout.setAlignment(Pos.CENTER);
 		levelSelectionLayout.setVgap(20);
-		levelSelectionLayout.setHgap(30);
+		levelSelectionLayout.setHgap(20);
 		
 		levelSelection = new Button[5];
 		for(Integer i = 0; i < levelSelection.length; i++) {
@@ -176,7 +178,7 @@ public class GUI extends Application {
 			}
 		});
 		
-		levelSelectionScene = new Scene(levelSelectionLayout,1366, 700);
+		levelSelectionScene = new Scene(levelSelectionLayout,1280, 720);
 		
 
 		deathCounter = new TextField("MORTES:");
@@ -196,7 +198,7 @@ public class GUI extends Application {
 		levelCounter.setLayoutY(-10);
 		
 		gameLayout = new Group();
-		gameScene = new Scene(gameLayout, 1366, 768, Color.DARKGRAY);
+		gameScene = new Scene(gameLayout, 1280, 720, Color.DARKGRAY);
 		gameScene.setOnMouseMoved(posTester);
 		gameScene.setOnKeyPressed(new EventHandler<KeyEvent>() {
 			@Override
@@ -285,7 +287,8 @@ public class GUI extends Application {
 		path2 = new Rectangle(500,400,300, 0);
 		eminen = new Enemy(circ, path2, 500, 400, 2);
 		//gameLayout.getChildren().add(eminen.getShape());
-		loadLevel(0);
+		currentLevel = 0;
+		loadLevel(currentLevel);
 		gameLayout.requestFocus();
 
 		/*
@@ -328,17 +331,21 @@ public class GUI extends Application {
 		 ArrayList<Wall> tet = new ArrayList<Wall>(); tet.add(zaWall);
 		 ArrayList<Enemy> tut = new ArrayList<Enemy>(); 
 		 tut.add(eminen); 
-		 Coin das = new Coin (new Circle(10,10,10),50,50); 
+		 Coin das = new Coin (new Circle(15),800,200); 
 		 ArrayList<Coin> tat = new ArrayList<Coin>(); 
 		 tat.add(das);
-		 CheckPoint daimn = new CheckPoint(new Circle(10,10,10), 60, 60, false, false); 
-		 ArrayList<CheckPoint> tit = new ArrayList<CheckPoint>(); 
+		 ArrayList<CheckPoint> tit = new ArrayList<CheckPoint>();
+		 tit.add(check1);
+		 tit.add(check2);
 		 Level test = new Level(0,pl,tut,tet,tat, tit); 
 		 save = new SerializedSave(); 
-		 save.openFileOutput(); 
-		 save.addLevel(test);
+		 save.openFileOutput();
+		 save.removeLevelFromMemory(0);
 		 save.closeFile();
-		 */
+		 save.openFileOutput();
+		 save.addLevel(test);
+		 save.closeFile();*/
+		 
 
 		rectangleAnimation.start();
 	}
@@ -348,13 +355,40 @@ public class GUI extends Application {
 			Shape intersect = Shape.intersect(block.getShape(), static_bloc.getShape());
 			if (intersect.getBoundsInLocal().getWidth() != -1) {
 				if (static_bloc.getClass().toString().equals("class Enemy")) {
-					pl.getShape().setTranslateX(0);
-					pl.getShape().setTranslateY(0);
+					
+					pl.setPoints(pl.getPoints() - unsavedCoins.size());
+					
+					for(int i = 0; i < levelCoins.size(); i ++) {
+						if(unsavedCoins.contains(i)) {
+							unsavedCoins.remove((Object) i);
+							nodes.add(levelCoins.get(i));
+							gameLayout.getChildren().add(levelCoins.get(i).getShape());
+						}
+					}
+					
+					for(int i = 0; i < levelCheckpoints.size(); i++) {
+						if(!levelCheckpoints.get(i).isActivated()) {
+							Rectangle checkShape = (Rectangle) levelCheckpoints.get(i - 1).getShape();
+							Bounds checkBounds = checkShape.localToScene(checkShape.getBoundsInLocal());
+							pl.getShape().relocate(checkBounds.getMinX() + (checkBounds.getMaxX() - checkBounds.getMinX())/2,
+									checkBounds.getMinY() + (checkBounds.getMaxY() - checkBounds.getMinY())/2);
+							pl.getShape().setTranslateX(0);
+							pl.getShape().setTranslateY(0);
+							break;
+						}
+					}
 					pl.setDeaths(pl.getDeaths() + 1);
 					deathCounter.setText("MORTES: "+pl.getDeaths());
-				} else if (static_bloc.getClass().toString() == "class Coin") {
+				} else if (static_bloc.getClass().toString().equals("class Coin")) {
 					pl.setPoints(pl.getPoints() + 1);
-					gameLayout.getChildren().remove(static_bloc);
+					for(int i = 0; i < levelCoins.size(); i++) {
+						if(levelCoins.get(i).getIniX() == static_bloc.getIniX() && levelCoins.get(i).getIniY() == static_bloc.getIniY()) {
+							nodes.remove(static_bloc);
+							gameLayout.getChildren().remove(levelCoins.get(i).getShape());
+							unsavedCoins.add(i);
+							break;
+						}
+					}
 				} else if (static_bloc.getClass().toString().equals("class Wall")) {
 					Rectangle blockShape = (Rectangle) block.getShape();
 					Vector2 blockCenter = new Vector2(
@@ -443,6 +477,31 @@ public class GUI extends Application {
 						rectangleVelocityY.set(0);
 					}
 				}
+				else if (static_bloc.getClass().toString().equals("class CheckPoint")) {
+					CheckPoint hitCheck = (CheckPoint) static_bloc;
+					if (hitCheck.isFinishLine() && pl.getPoints() == niveis.get(currentLevel).getCoins().size()) {
+						if(currentLevel == niveis.size() - 1) {
+							primaryStage.setScene(menuScene);
+							currentLevel = 0;
+							loadLevel(currentLevel);
+						}
+						else {
+							currentLevel++;
+							loadLevel(currentLevel);
+						}
+					}
+					else if(!hitCheck.isActivated()) {
+						for(int i = 1; i < niveis.get(currentLevel).getCheckPoints().size(); i++) {
+							if(!levelCheckpoints.get(i).isActivated()) {
+							   levelCheckpoints.get(i).setActivated(true);
+							   break;
+							}
+						}
+						for(int i = 0; i < unsavedCoins.size(); i++) {
+							savedCoins.add(unsavedCoins.get(i));
+						}
+					}
+				}
 			} else if (static_bloc.getClass().toString().equals("class Wall")) {
 				canMoveLeft = true;
 				canMoveRight = true;
@@ -454,11 +513,17 @@ public class GUI extends Application {
 	
 	public void loadLevel(int levelNumber) {
 		
+		gameLayout.getChildren().remove(3, gameLayout.getChildren().size());
 		save = new SerializedSave();
 		save.openFileInput();
 		niveis = save.readLevels();
+		System.out.println(niveis.size());
 		save.closeFile();
 		nodes = new ArrayList<GameObject>();
+		levelCheckpoints = niveis.get(levelNumber).getCheckPoints();
+		levelCoins = niveis.get(levelNumber).getCoins();
+		savedCoins = new ArrayList<Integer>();
+		unsavedCoins = new ArrayList<Integer>();
 		for (int i = 0; i < niveis.get(levelNumber).getWalls().size(); i++) {
 			nodes.add(niveis.get(levelNumber).getWalls().get(i));
 			Shape walle = niveis.get(levelNumber).getWalls().get(i).getShape();
@@ -472,20 +537,35 @@ public class GUI extends Application {
 			gameLayout.getChildren().add(eminen.getShape());
 		}
 		for (int i = 0; i < niveis.get(levelNumber).getCoins().size(); i++) {
-			nodes.add(niveis.get(levelNumber).getCoins().get(i));
-			gameLayout.getChildren().add(niveis.get(levelNumber).getCoins().get(i).getShape());
+			nodes.add(levelCoins.get(i));
+			gameLayout.getChildren().add(levelCoins.get(i).getShape());
 		}
 		for (int i = 0; i < niveis.get(levelNumber).getCheckPoints().size(); i++) {
-			nodes.add(niveis.get(levelNumber).getCheckPoints().get(i));
-			gameLayout.getChildren().add(niveis.get(levelNumber).getCheckPoints().get(i).getShape());
+			nodes.add(levelCheckpoints.get(i));
+			//System.out.println(levelCheckpoints.get(i).getShape().getLayoutX());
+			gameLayout.getChildren().add(levelCheckpoints.get(i).getShape());
 		}
 		
+		
 		pl = niveis.get(levelNumber).getPlayer();
+		pl.setPoints(0);
+		rectangleVelocityX.set(0);
+		rectangleVelocityY.set(0);
 		gameLayout.getChildren().add(pl.getShape());
 		
 		
 	}
 
+	private class MouseHandlerTest implements EventHandler<MouseEvent> {
+
+		@Override
+		public void handle(MouseEvent arg0) {
+			testField.setText("X: " + arg0.getX() + "\tY: " + arg0.getY());
+
+		}
+
+	}
+	
 	private class MouseHandler implements EventHandler<MouseEvent>{
 		@Override
 		public void handle(MouseEvent e) {	
@@ -495,17 +575,6 @@ public class GUI extends Application {
 				((Node) e.getSource()).setStyle("-fx-text-fill: black;");
 			}
 		}
-	}
-		
-	
-	
-	private class MouseHandlerTest implements EventHandler<MouseEvent> {
-
-		@Override
-		public void handle(MouseEvent arg0) {
-			testField.setText("X: " + arg0.getX() + "\tY: " + arg0.getY());
-		}
-
 	}
 
 	private class ButtonHandler implements EventHandler<ActionEvent> {
@@ -523,7 +592,8 @@ public class GUI extends Application {
 				primaryStage.setScene(levelSelectionScene);
 			}
 			else if (arg0.getSource() == levelSelection[0]) {
-				loadLevel(0);
+				currentLevel = 0;
+				loadLevel(currentLevel);
 				primaryStage.setScene(gameScene);
 			}
 		}

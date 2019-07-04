@@ -22,7 +22,6 @@ public class Enemy extends GameObject implements Serializable {
 		// TODO Auto-generated constructor stub
 	}
 	public void Move() {
-		System.out.println(path.toString());
 		PathTransition mover = new PathTransition(Duration.seconds(moveDuration),path,this.shape);
 		mover.setCycleCount(PathTransition.INDEFINITE);
 		mover.setInterpolator(Interpolator.LINEAR);

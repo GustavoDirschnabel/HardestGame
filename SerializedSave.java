@@ -74,6 +74,33 @@ public class SerializedSave {
 		}
 	}
 	
+	public void removeLevelFromMemory(int levelNumber) {
+		for(int i = 0; i < savedLevel.size(); i++) {
+			if(savedLevel.get(i).getLevelNumber() == levelNumber) {
+				savedLevel.remove(i);
+				break;
+			}
+		}
+		try {
+			output.writeObject(savedLevel);
+		} catch (IOException e) {
+			JOptionPane.showMessageDialog(null, "IOException ao salvar levels", "Erro", JOptionPane.ERROR_MESSAGE);
+			System.err.println(e);
+		}
+	}
+	
+	public void setDeathCounterOnMemory(int deaths) {
+		for(int i = 1; i < savedLevel.size(); i++) {
+			savedLevel.get(i).getPlayer().setDeaths(deaths);
+		}
+		try {
+			output.writeObject(savedLevel);
+		} catch (IOException e) {
+			JOptionPane.showMessageDialog(null, "IOException ao salvar levels", "Erro", JOptionPane.ERROR_MESSAGE);
+			System.err.println(e);
+		}
+	}
+	
 	public ArrayList<Level> readLevels(){
 		ArrayList<Level> levels = new ArrayList<Level>();
 		try {

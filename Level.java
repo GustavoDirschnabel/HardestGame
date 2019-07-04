@@ -1,6 +1,7 @@
 import java.io.Serializable;
 import java.util.ArrayList;
 
+import javafx.geometry.Bounds;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Ellipse;
@@ -125,8 +126,10 @@ public class Level implements Serializable {
 		}
 		
 		for(int i = 0; i < checkpoints.size(); i++) {
-			Vector2 pos = new Vector2 (checkpoints.get(i).iniX, checkpoints.get(i).iniY);
-			Vector2 bounds = new Vector2(checkpoints.get(i).getShape().getScaleX(),checkpoints.get(i).getShape().getScaleY());
+			Vector2 pos = new Vector2 (checkpoints.get(i).getIniX(), checkpoints.get(i).getIniY());
+			Shape checkShape = checkpoints.get(i).getShape();
+			Bounds checkBounds = checkShape.localToScene(checkShape.getBoundsInLocal());
+			Vector2 bounds = new Vector2(checkBounds.getMaxX() - checkBounds.getMinX(), checkBounds.getMaxY() - checkBounds.getMinY());
 			this.posCheckpoints.add(i,pos);
 			this.checkPointBounds.add(i,bounds);
 		}
@@ -279,7 +282,6 @@ public class Level implements Serializable {
 	}
 	
 	public ArrayList<Coin> getCoins() {
-		Circle circ = new Circle(0,0,15);
 		ArrayList<Coin> coins = new ArrayList<Coin>();
 		double x = 0;
 		double y = 0;
@@ -287,8 +289,7 @@ public class Level implements Serializable {
 		for(int i = 0; i < posCoins.size(); i++) {
 			x = posCoins.get(i).getPosX();
 		    y = posCoins.get(i).getPosY();
-			circ.setCenterX(x);
-			circ.setCenterY(y);
+		    Circle circ = new Circle(x,y,15);
 			circ.setFill(Color.GOLD);
 			Coin coin = new Coin(circ,x,y);
 			coins.add(coin);
@@ -318,10 +319,6 @@ public class Level implements Serializable {
 	}
 	
 	public ArrayList<CheckPoint> getCheckPoints() {
-		Rectangle rect = new Rectangle(0,0);
-		rect.setFill(Color.DARKSEAGREEN);
-		rect.setStroke(Color.DARKGREEN);
-		rect.setOpacity(0.5);
 		ArrayList<CheckPoint> checkpoints = new ArrayList<CheckPoint>();
 		CheckPoint check;
 		double x = 0;
@@ -335,8 +332,10 @@ public class Level implements Serializable {
 			w = checkPointBounds.get(i).getPosX();
 			h = checkPointBounds.get(i).getPosY();
 			
-			rect.setWidth(w);
-			rect.setHeight(h);
+			Rectangle rect = new Rectangle(x,y,w,h);
+			rect.setFill(Color.DARKSEAGREEN);
+			rect.setStroke(Color.DARKGREEN);
+			rect.setOpacity(0.5);
 			
 			if(i == 0) {
 				check = new CheckPoint(rect,x,y,false,true);
@@ -347,9 +346,10 @@ public class Level implements Serializable {
 			else {
 				check = new CheckPoint(rect,x,y,false,false);
 			}
-			
-			checkpoints.add(check);
+			Bounds rectBounds = rect.localToScene(rect.getBoundsInLocal());
+			checkpoints.add(i,check);
 		}
+	//	System.out.println(checkpoints.get(0).getShape().getLayoutX() + ", " + checkpoints.get(1).getShape().getLayoutX());
 		return checkpoints;
 	}
 
