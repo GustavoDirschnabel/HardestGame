@@ -1,6 +1,7 @@
-import javafx.animation.TranslateTransition;
-import javafx.scene.input.KeyCode;
+
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
+import javafx.scene.shape.StrokeType;
 import javafx.util.Duration;
 
 public class Player extends GameObject {
@@ -10,6 +11,9 @@ public class Player extends GameObject {
 		super(shape, x, y);
 		this.points = 0;
 		this.deaths = deaths;
+		this.getShape().setStrokeWidth(5);
+		this.getShape().setStrokeType(StrokeType.INSIDE);
+		this.getShape().setFill(Color.FIREBRICK);
 	}
 	public int getDeaths() {
 		return deaths;

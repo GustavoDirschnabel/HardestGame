@@ -42,7 +42,7 @@ public class GUI extends Application {
 	private Rectangle path2;
 	private Player pl;
 	private final double collisionTolerance = 0.45;
-	private boolean canMoveLeft,canMoveRight,canMoveUp, canMoveDown,movingLeft,movingRight,movingUp,movingDown;
+	private boolean canMoveLeft, canMoveRight, canMoveUp, canMoveDown, movingLeft, movingRight, movingUp, movingDown;
 	private SerializedSave save;
 	private ArrayList<Level> niveis;
 	private ArrayList<GameObject> nodes;
@@ -66,7 +66,7 @@ public class GUI extends Application {
 				pl.getShape().setTranslateY(newY);
 			}
 			lastUpdateTime.set(timestamp);
-				
+
 			checkShapeIntersection(pl);
 		}
 	};
@@ -92,7 +92,7 @@ public class GUI extends Application {
 		exit = new Button();
 		exit.setText("Exit");
 		exit.setOnAction(btnHandler);
-		
+
 		testField = new TextField();
 		testField.setEditable(false);
 
@@ -124,30 +124,30 @@ public class GUI extends Application {
 			@Override
 			public void handle(KeyEvent event) {
 				if (event.getCode() == KeyCode.RIGHT) {
-					if(canMoveRight) {
-					rectangleVelocityX.set(rectangleSpeedX);
-					movingRight = true;
-					movingLeft = false;
+					if (canMoveRight) {
+						rectangleVelocityX.set(rectangleSpeedX);
+						movingRight = true;
+						movingLeft = false;
 					}
 				} else if (event.getCode() == KeyCode.LEFT) {
-					if(canMoveLeft) {
-					rectangleVelocityX.set(-rectangleSpeedX);
-					movingRight = false;
-					movingLeft = true;
+					if (canMoveLeft) {
+						rectangleVelocityX.set(-rectangleSpeedX);
+						movingLeft = true;
+						movingRight = false;
 					}
 				} else if (event.getCode() == KeyCode.UP) {
-					if(canMoveUp){
+					if (canMoveUp) {
 						rectangleVelocityY.set(-rectangleSpeedY);
 						movingUp = true;
 						movingDown = false;
-						}
+					}
 				} else if (event.getCode() == KeyCode.DOWN) {
-					if(canMoveDown){
+					if (canMoveDown) {
 						rectangleVelocityY.set(rectangleSpeedY);
-						movingUp = false;
 						movingDown = true;
-						}
-				} else if (event.getCode() == KeyCode.ENTER){
+						movingUp = false;
+					}
+				} else if (event.getCode() == KeyCode.ENTER) {
 					eminen.Move(2);
 				}
 			}
@@ -155,11 +155,33 @@ public class GUI extends Application {
 		gameScene.setOnKeyReleased(new EventHandler<KeyEvent>() {
 			@Override
 			public void handle(KeyEvent event) {
-				if (event.getCode() == KeyCode.RIGHT || event.getCode() == KeyCode.LEFT) {
-					rectangleVelocityX.set(0);
+				if (event.getCode() == KeyCode.RIGHT) {
+					movingRight = false;
+					if (!movingLeft)
+						rectangleVelocityX.set(0);
+					else if (canMoveLeft)
+						rectangleVelocityX.set(-rectangleSpeedX);
 				}
-				if (event.getCode() == KeyCode.UP || event.getCode() == KeyCode.DOWN) {
-					rectangleVelocityY.set(0);
+				if (event.getCode() == KeyCode.LEFT) {
+					movingLeft = false;
+					if (!movingRight)
+						rectangleVelocityX.set(0);
+					else if (canMoveRight)
+						rectangleVelocityX.set(rectangleSpeedX);
+				}
+				if (event.getCode() == KeyCode.UP) {
+					movingUp = false;
+					if (!movingDown)
+						rectangleVelocityY.set(0);
+					else if (canMoveDown)
+						rectangleVelocityY.set(rectangleSpeedY);
+				}
+				if (event.getCode() == KeyCode.DOWN) {
+					movingDown = false;
+					if (!movingUp)
+						rectangleVelocityY.set(0);
+					else if (canMoveUp)
+						rectangleVelocityY.set(-rectangleSpeedY);
 				}
 			}
 		});
@@ -173,59 +195,53 @@ public class GUI extends Application {
 
 		Wall zaWall = new Wall(pol, 100, 100);
 		gameLayout.getChildren().add(zaWall.getShape());
-		
+
 		Circle circ = new Circle(15);
 		circ.setFill(Color.BLUE);
 		circ.setStroke(Color.BLACK);
-		double[] pathPoints = {0,100,
-				300,0, 0, 0		};
+		double[] pathPoints = { 0, 100, 300, 0, 0, 0 };
 		path = new Polyline(pathPoints);
-		path2 = new Rectangle(300,0);
-		eminen = new Enemy(circ,path2,500,400);
+		path2 = new Rectangle(300, 0);
+		eminen = new Enemy(circ, path2, 500, 400);
 		gameLayout.getChildren().add(eminen.getShape());
 		gameLayout.requestFocus();
-		
+
 		/*
-		Circle circ2 = new Circle(15);
-		circ.setFill(Color.BLUE);
-		circ.setStroke(Color.BLACK);
-		Enemy eminen2 = new Enemy(circ2,500,400);
-		gameLayout.getChildren().add(eminen2.getShape());
-		
-		Circle circ3 = new Circle(15);
-		circ.setFill(Color.BLUE);
-		circ.setStroke(Color.BLACK);
-		Enemy eminen3 = new Enemy(circ3,500,400);
-		gameLayout.getChildren().add(eminen3.getShape());
-		
-		Circle circ4 = new Circle(15);
-		circ.setFill(Color.BLUE);
-		circ.setStroke(Color.BLACK);
-		Enemy eminen4 = new Enemy(circ4,500,400);
-		gameLayout.getChildren().add(eminen4.getShape());*/
+		 * Circle circ2 = new Circle(15); circ.setFill(Color.BLUE);
+		 * circ.setStroke(Color.BLACK); Enemy eminen2 = new Enemy(circ2,500,400);
+		 * gameLayout.getChildren().add(eminen2.getShape());
+		 * 
+		 * Circle circ3 = new Circle(15); circ.setFill(Color.BLUE);
+		 * circ.setStroke(Color.BLACK); Enemy eminen3 = new Enemy(circ3,500,400);
+		 * gameLayout.getChildren().add(eminen3.getShape());
+		 * 
+		 * Circle circ4 = new Circle(15); circ.setFill(Color.BLUE);
+		 * circ.setStroke(Color.BLACK); Enemy eminen4 = new Enemy(circ4,500,400);
+		 * gameLayout.getChildren().add(eminen4.getShape());
+		 */
 
 		Rectangle rekt = new Rectangle(30, 30);
 		rekt.setStroke(Color.BLACK);
 		rekt.setFill(Color.FIREBRICK);
-		pl = new Player(rekt, 300, 500,0);
-		
-		Rectangle checkS = new Rectangle(200,200);
+		pl = new Player(rekt, 300, 500, 0);
+
+		Rectangle checkS = new Rectangle(200, 200);
 		checkS.setFill(Color.DARKSEAGREEN);
 		checkS.setStroke(Color.DARKGREEN);
 		checkS.setOpacity(0.5);
-		Rectangle checkR = new Rectangle(200,200);
+		Rectangle checkR = new Rectangle(200, 200);
 		checkR.setFill(Color.DARKSEAGREEN);
 		checkR.setStroke(Color.DARKGREEN);
 		checkR.setOpacity(0.5);
-		CheckPoint check1 = new CheckPoint(checkS,100,400,false,true);
-		CheckPoint check2 = new CheckPoint(checkR,1050,100,true,false);
-		
+		CheckPoint check1 = new CheckPoint(checkS, 100, 400, false, true);
+		CheckPoint check2 = new CheckPoint(checkR, 1050, 100, true, false);
+
 		gameLayout.getChildren().add(check1.getShape());
 		gameLayout.getChildren().add(check2.getShape());
 		gameLayout.getChildren().add(pl.getShape());
-		
+
 		// consertar a condição de verificação do nivel
-		
+
 		save = new SerializedSave();
 		save.openFileInput();
 		niveis = save.readLevels();
@@ -240,31 +256,23 @@ public class GUI extends Application {
 		for (int i = 0; i < niveis.get(0).getCoins().size(); i++) {
 			nodes.add(niveis.get(0).getCoins().get(i));
 		}
-		
-		
-		
+
 		/*
-		ArrayList<Wall> tet = new ArrayList<Wall>();
-		tet.add(zaWall);
-		ArrayList<Enemy> tut = new ArrayList<Enemy>();
-		tut.add(eminen);
-		Coin das = new Coin (new Circle(10,10,10),50,50);
-		ArrayList<Coin> tat = new ArrayList<Coin>();
-		tat.add(das);
-		CheckPoint daimn = new CheckPoint(new Circle(10,10,10), 60, 60, false, false);
-		ArrayList<CheckPoint> tit = new ArrayList<CheckPoint>();
-		Level test = new Level(0,pl,tut,tet,tat, tit);
-		save = new SerializedSave();
-		save.openFileOutput();
-		save.addLevel(test);
-		save.closeFile();
-		*/
-		
+		 * ArrayList<Wall> tet = new ArrayList<Wall>(); tet.add(zaWall);
+		 * ArrayList<Enemy> tut = new ArrayList<Enemy>(); tut.add(eminen); Coin das =
+		 * new Coin (new Circle(10,10,10),50,50); ArrayList<Coin> tat = new
+		 * ArrayList<Coin>(); tat.add(das); CheckPoint daimn = new CheckPoint(new
+		 * Circle(10,10,10), 60, 60, false, false); ArrayList<CheckPoint> tit = new
+		 * ArrayList<CheckPoint>(); Level test = new Level(0,pl,tut,tet,tat, tit); save
+		 * = new SerializedSave(); save.openFileOutput(); save.addLevel(test);
+		 * save.closeFile();
+		 */
+
 		canMoveLeft = true;
 		canMoveRight = true;
 		canMoveUp = true;
 		canMoveDown = true;
-		
+
 		rectangleAnimation.start();
 	}
 
@@ -274,125 +282,101 @@ public class GUI extends Application {
 			if (intersect.getBoundsInLocal().getWidth() != -1) {
 				if (static_bloc.getClass().toString().equals("class Enemy")) {
 					pl.getShape().setTranslateX(0);
-                    pl.getShape().setTranslateY(0);
-					pl.setDeaths(pl.getDeaths()+1);
+					pl.getShape().setTranslateY(0);
+					pl.setDeaths(pl.getDeaths() + 1);
 					System.out.println("morreu");
-				}else if(static_bloc.getClass().toString() == "class Coin") {
-					pl.setPoints(pl.getPoints()+1);
+				} else if (static_bloc.getClass().toString() == "class Coin") {
+					pl.setPoints(pl.getPoints() + 1);
 					gameLayout.getChildren().remove(static_bloc);
-				}else if(static_bloc.getClass().toString().equals("class Wall")) {
-					//gameLayout.getChildren().add(intersect);
+				} else if (static_bloc.getClass().toString().equals("class Wall")) {
 					Rectangle blockShape = (Rectangle) block.getShape();
-					Vector2 blockCenter = new Vector2(blockShape.getLayoutX() + blockShape.getTranslateX() + blockShape.getWidth()/2
-							, blockShape.getLayoutY() + blockShape.getTranslateY() + blockShape.getHeight()/2);
+					Vector2 blockCenter = new Vector2(
+							blockShape.getLayoutX() + blockShape.getTranslateX() + blockShape.getWidth() / 2,
+							blockShape.getLayoutY() + blockShape.getTranslateY() + blockShape.getHeight() / 2);
 					
-					if(movingRight)
-						blockCenter.setPosX(blockShape.getLayoutX() + blockShape.getTranslateX());
-					if(movingLeft)
-						blockCenter.setPosX(blockShape.getLayoutX() + blockShape.getTranslateX() + blockShape.getWidth());
-					if(movingDown)
-						blockCenter.setPosY(blockShape.getLayoutY() + blockShape.getTranslateY());
-					if(movingUp)
-						blockCenter.setPosY(blockShape.getLayoutY() + blockShape.getTranslateY() + blockShape.getHeight());
-					
+					canMoveLeft = true;
+					canMoveRight = true;
+					canMoveUp = true;
+					canMoveDown = true;
+
 					Bounds intersectBounds = intersect.localToScene(intersect.getBoundsInLocal());
-					Vector2 intersectCenter = new Vector2( intersectBounds.getMinX() + (intersectBounds.getMaxX() - intersectBounds.getMinX())/2,
-							intersectBounds.getMinY() + (intersectBounds.getMaxY() - intersectBounds.getMinY())/2);
+					Vector2 intersectCenter = new Vector2(
+							intersectBounds.getMinX() + (intersectBounds.getMaxX() - intersectBounds.getMinX()) / 2,
+							intersectBounds.getMinY() + (intersectBounds.getMaxY() - intersectBounds.getMinY()) / 2);
 					Vector2 centerDifference = new Vector2(intersectCenter.getPosX() - blockCenter.getPosX(),
-														   intersectCenter.getPosY() - blockCenter.getPosY());
-					double sumOfAbsoluteDifferences = Math.abs(centerDifference.getPosX()) + Math.abs(centerDifference.getPosY());
+							intersectCenter.getPosY() - blockCenter.getPosY());
+					double sumOfAbsoluteDifferences = Math.abs(centerDifference.getPosX())
+							+ Math.abs(centerDifference.getPosY());
 					boolean stuck = false;
-					//caso a colis�o seja com um canto interno]
-					
-					if(sumOfAbsoluteDifferences <= 30 || sumOfAbsoluteDifferences >= 50) {
-						Rectangle fixer = new Rectangle(intersectBounds.getMinX(),intersectBounds.getMinY(),10,10);
-						fixer.setFill(Color.CRIMSON);
-						gameLayout.getChildren().add(fixer);
-						Shape verticeFinder = Shape.intersect(fixer, intersect);
-						if(verticeFinder.getBoundsInLocal().getWidth() == -1) {
-							/*centerDifference.setPosX(intersectBounds.getMaxX() - blockCenter.getPosX());
-							centerDifference.setPosY(intersectBounds.getMaxY() - blockCenter.getPosX());
-							sumOfAbsoluteDifferences = Math.abs(centerDifference.getPosX()) + Math.abs(centerDifference.getPosY());*/
-							System.err.println("Consertado 1");
+
+					if (sumOfAbsoluteDifferences <= 10 || sumOfAbsoluteDifferences >= 50) {
+						rectangleVelocityX.set(0);
+						rectangleVelocityY.set(0);
+						Rectangle fixer = new Rectangle(intersectBounds.getMinX(), intersectBounds.getMinY(), 10, 10);
+						Shape verticeFinder = Shape.intersect(fixer, static_bloc.getShape());
+						if (verticeFinder.getBoundsInLocal().getWidth() == -1) {
 							stuck = true;
 							canMoveLeft = true;
 							canMoveUp = true;
 							canMoveRight = false;
 							canMoveDown = false;
-						}
-						else {
-							fixer.setLayoutX(intersectBounds.getMaxX() - intersectBounds.getMinX());
-							verticeFinder = Shape.intersect(fixer, intersect);
-							if(verticeFinder.getBoundsInLocal().getWidth() == -1) {
-								/*centerDifference.setPosX(intersectBounds.getMinX() - blockCenter.getPosX());
-								centerDifference.setPosY(intersectBounds.getMaxY() - blockCenter.getPosX());
-								sumOfAbsoluteDifferences = Math.abs(centerDifference.getPosX()) + Math.abs(centerDifference.getPosY());*/
-								System.err.println("Consertado 2");
+						} else {
+							fixer.setTranslateX(intersectBounds.getMaxX() - intersectBounds.getMinX() - 1);
+							verticeFinder = Shape.intersect(fixer, static_bloc.getShape());
+							if (verticeFinder.getBoundsInLocal().getHeight() == -1
+									&& verticeFinder.getBoundsInLocal().getWidth() == -1) {
 								stuck = true;
 								canMoveLeft = false;
 								canMoveUp = true;
 								canMoveRight = true;
 								canMoveDown = false;
-							}
-							else {
+							} else {
 								fixer.setTranslateY(intersectBounds.getMaxY() - intersectBounds.getMinY());
-								verticeFinder = Shape.intersect(fixer, intersect);
-								if(verticeFinder.getBoundsInLocal().getWidth() == -1) {
-									/*centerDifference.setPosX(intersectBounds.getMinX() - blockCenter.getPosX());
-									centerDifference.setPosY(intersectBounds.getMinY() - blockCenter.getPosX());
-									sumOfAbsoluteDifferences = Math.abs(centerDifference.getPosX()) + Math.abs(centerDifference.getPosY());*/
-									System.err.println("Consertado 3");
+								verticeFinder = Shape.intersect(fixer, static_bloc.getShape());
+								if (verticeFinder.getBoundsInLocal().getWidth() == -1) {
 									stuck = true;
 									canMoveLeft = false;
 									canMoveUp = false;
 									canMoveRight = true;
 									canMoveDown = true;
-								}
-								else {
-									fixer.setTranslateX(intersectBounds.getMinX() - intersectBounds.getMaxX());
-									verticeFinder = Shape.intersect(fixer, intersect);
-									if(verticeFinder.getBoundsInLocal().getWidth() == -1) {
-										/*centerDifference.setPosX(intersectBounds.getMaxX() - blockCenter.getPosX());
-										centerDifference.setPosY(intersectBounds.getMinY() - blockCenter.getPosX());
-										sumOfAbsoluteDifferences = Math.abs(centerDifference.getPosX()) + Math.abs(centerDifference.getPosY());*/
-										System.err.println("Consertado 4");
-										stuck = true;
-										canMoveLeft = true;
-										canMoveUp = false;
-										canMoveRight = false;
-										canMoveDown = true;
-									}
+								} else {
+									stuck = true;
+									canMoveLeft = true;
+									canMoveUp = false;
+									canMoveRight = false;
+									canMoveDown = true;
+
 								}
 							}
 						}
-						//gameLayout.getChildren().remove(fixer);
 					}
-					
-					System.out.println("X: " + centerDifference.getPosX() + "/nY:" + centerDifference.getPosY());
+					// Comandos para teste
+					/*System.out.println("X: " + centerDifference.getPosX() + "\tY: " + centerDifference.getPosY());
 					System.out.println("SAD: " + sumOfAbsoluteDifferences);
-					System.out.println(Math.abs(centerDifference.getPosX())/sumOfAbsoluteDifferences);
-					System.out.println(Math.abs(centerDifference.getPosY())/sumOfAbsoluteDifferences);
-					//System.out.println(Math.abs(centerDifference.getPosX())/sumOfAbsoluteDifferences > collisionTolerance);
-					if(Math.abs(centerDifference.getPosX())/sumOfAbsoluteDifferences > collisionTolerance) {
-						if(centerDifference.getPosX() < 0) {
+					System.out.println(Math.abs(centerDifference.getPosX()) / sumOfAbsoluteDifferences);
+					System.out.println(Math.abs(centerDifference.getPosY()) / sumOfAbsoluteDifferences);
+					System.out.println("mRight: " + movingRight + "\tmLeft: " + movingLeft + "\tUp:" + movingUp + "\tDown: " + movingDown);*/
+					
+					if (Math.abs(centerDifference.getPosX()) / sumOfAbsoluteDifferences > collisionTolerance
+							&& !stuck) {
+						if (centerDifference.getPosX() < 0) {
 							canMoveLeft = false;
-						}
-						else {
+						} else {
 							canMoveRight = false;
 						}
 						rectangleVelocityX.set(0);
 					}
-					if(Math.abs(centerDifference.getPosY())/sumOfAbsoluteDifferences > collisionTolerance){
-						if(centerDifference.getPosY() < 0) {
+					if (Math.abs(centerDifference.getPosY()) / sumOfAbsoluteDifferences > collisionTolerance
+							&& !stuck) {
+						if (centerDifference.getPosY() < 0) {
 							canMoveUp = false;
-						}
-						else {
+						} else {
 							canMoveDown = false;
 						}
 						rectangleVelocityY.set(0);
 					}
 				}
-			}else if(static_bloc.getClass().toString().equals("class Wall")) {
+			} else if (static_bloc.getClass().toString().equals("class Wall")) {
 				canMoveLeft = true;
 				canMoveRight = true;
 				canMoveUp = true;
@@ -400,15 +384,15 @@ public class GUI extends Application {
 			}
 		}
 	}
-	
+
 	private class MouseHandler implements EventHandler<MouseEvent> {
 
 		@Override
 		public void handle(MouseEvent arg0) {
 			testField.setText("X: " + arg0.getX() + "\tY: " + arg0.getY());
-			
+
 		}
-		
+
 	}
 
 	private class ButtonHandler implements EventHandler<ActionEvent> {
@@ -420,7 +404,7 @@ public class GUI extends Application {
 				stage.close();
 			} else if (arg0.getSource() == start) {
 				primaryStage.setScene(gameScene);
-				
+
 			}
 
 		}
