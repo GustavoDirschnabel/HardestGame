@@ -20,11 +20,9 @@ public class SerializedSave {
 	public SerializedSave() {
 		this.save = new File("Levels.ora");
 		if(!save.exists()) {
-			try {
-				save.createNewFile();
-			} catch (IOException e) {
-				JOptionPane.showMessageDialog(null, "IOException ao inicializar o save", "Erro", JOptionPane.ERROR_MESSAGE);
-			}
+			
+				JOptionPane.showMessageDialog(null, "Arquivo Serializado não Encontrado", "Erro", JOptionPane.ERROR_MESSAGE);
+				System.exit(1);
 		}
 	}
 	

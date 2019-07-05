@@ -11,8 +11,8 @@ import javafx.animation.PathTransition;
 
 public class Enemy extends GameObject implements Serializable {
 	private Shape path;
-	int moveDuration;
-	public Enemy(Circle shape,Shape path, double x, double y, int moveDuration) {
+	double moveDuration;
+	public Enemy(Circle shape,Shape path, double x, double y, double moveDuration) {
 		super(shape, x, y);
 		this.path = path;
 		this.moveDuration = moveDuration;
@@ -34,10 +34,10 @@ public class Enemy extends GameObject implements Serializable {
 		this.path = path;
 		this.Move();
 	}
-	public int getMoveDuration() {
+	public double getMoveDuration() {
 		return moveDuration;
 	}
-	public void setMoveDuration(int moveDuration) {
+	public void setMoveDuration(double moveDuration) {
 		this.moveDuration = moveDuration;
 	}
 

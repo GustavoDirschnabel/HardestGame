@@ -18,7 +18,7 @@ public class Level implements Serializable {
 	private ArrayList<Integer> enemyPathType;
 	private ArrayList<Double> enemyPathPoints;
 	private ArrayList<Integer> firstIndexofEachEnemyPath;
-	private ArrayList<Integer> enemyMoveDuration;
+	private ArrayList<Double> enemyMoveDuration;
 	private ArrayList<Double> enemyPathRotation;
 	private ArrayList<Vector2> posWalls;
 	private ArrayList<Double> wallPoints;
@@ -42,7 +42,7 @@ public class Level implements Serializable {
 		this.enemyPathPoints = new ArrayList<Double>();
 		this.enemyPathType = new ArrayList<Integer>();
 		this.firstIndexofEachEnemyPath = new ArrayList<Integer>();
-		this.enemyMoveDuration = new ArrayList<Integer>();
+		this.enemyMoveDuration = new ArrayList<Double>();
 		this.enemyPathRotation = new ArrayList<Double>();
 		
 		for(int i = 0; i < enemies.size(); i ++) {
@@ -77,7 +77,7 @@ public class Level implements Serializable {
 			}
 			
 			this.firstIndexofEachEnemyPath.add(i,index);
-			
+			System.out.println(enePath.getClass().getName());
 			switch(enePath.getClass().getName()) {
 				case "javafx.scene.shape.Rectangle":
 					this.enemyPathType.add(i, ShapeTypes.RECTANGLE);
@@ -86,7 +86,7 @@ public class Level implements Serializable {
 					this.enemyPathPoints.add(this.firstIndexofEachEnemyPath.get(i) + 1,path.getHeight());
 					break;
 				case "javafx.scene.shape.Circle":
-					this.enemyPathType.add(i, ShapeTypes.RECTANGLE);
+					this.enemyPathType.add(i, ShapeTypes.CIRCLE);
 					Circle path2 = (Circle) enemies.get(i).getPath();
 					this.enemyPathPoints.add(this.firstIndexofEachEnemyPath.get(i),path2.getRadius());
 					break;
@@ -164,7 +164,7 @@ public class Level implements Serializable {
 		ArrayList<Enemy> enemies = new ArrayList<Enemy>();
 		double x = 0;
 		double y = 0;
-		int moveDuration = 0;
+		double moveDuration = 0;
 		
 		for(int i = 0; i < posEnemies.size(); i++) {
 			Circle circ = new Circle(0,0,12.5);
@@ -178,6 +178,7 @@ public class Level implements Serializable {
 			
 			Enemy enemy = new Enemy(circ,null,x,y,moveDuration);
 			int dataPos = this.firstIndexofEachEnemyPath.get(i);
+			System.out.println(this.enemyPathType.get(i));
 			switch(this.enemyPathType.get(i)) {
 				case ShapeTypes.RECTANGLE:
 					Rectangle path1 = new Rectangle(x,y,this.enemyPathPoints.get(dataPos), this.enemyPathPoints.get(dataPos + 1));
