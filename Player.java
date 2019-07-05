@@ -13,7 +13,8 @@ public class Player extends GameObject {
 		this.deaths = deaths;
 		this.getShape().setStrokeWidth(5);
 		this.getShape().setStrokeType(StrokeType.INSIDE);
-		this.getShape().setFill(Color.FIREBRICK);
+		this.getShape().setStroke(Color.BLACK);
+		this.getShape().setFill(Color.CRIMSON);
 	}
 	public int getDeaths() {
 		return deaths;

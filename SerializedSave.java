@@ -20,11 +20,9 @@ public class SerializedSave {
 	public SerializedSave() {
 		this.save = new File("Levels.ora");
 		if(!save.exists()) {
-			try {
-				save.createNewFile();
-			} catch (IOException e) {
-				JOptionPane.showMessageDialog(null, "IOException ao inicializar o save", "Erro", JOptionPane.ERROR_MESSAGE);
-			}
+			
+				JOptionPane.showMessageDialog(null, "Arquivo Serializado não Encontrado", "Erro", JOptionPane.ERROR_MESSAGE);
+				System.exit(1);
 		}
 	}
 	
@@ -67,6 +65,33 @@ public class SerializedSave {
 	public void addLevel(Level level) {
 		try {
 			savedLevel.add(level);
+			output.writeObject(savedLevel);
+		} catch (IOException e) {
+			JOptionPane.showMessageDialog(null, "IOException ao salvar levels", "Erro", JOptionPane.ERROR_MESSAGE);
+			System.err.println(e);
+		}
+	}
+	
+	public void removeLevelFromMemory(int levelNumber) {
+		for(int i = 0; i < savedLevel.size(); i++) {
+			if(savedLevel.get(i).getLevelNumber() == levelNumber) {
+				savedLevel.remove(i);
+				break;
+			}
+		}
+		try {
+			output.writeObject(savedLevel);
+		} catch (IOException e) {
+			JOptionPane.showMessageDialog(null, "IOException ao salvar levels", "Erro", JOptionPane.ERROR_MESSAGE);
+			System.err.println(e);
+		}
+	}
+	
+	public void setDeathCounterOnMemory(int deaths) {
+		for(int i = 1; i < savedLevel.size(); i++) {
+			savedLevel.get(i).getPlayer().setDeaths(deaths);
+		}
+		try {
 			output.writeObject(savedLevel);
 		} catch (IOException e) {
 			JOptionPane.showMessageDialog(null, "IOException ao salvar levels", "Erro", JOptionPane.ERROR_MESSAGE);

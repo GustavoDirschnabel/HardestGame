@@ -1,12 +1,14 @@
 import java.io.Serializable;
 import java.util.ArrayList;
 
+import javafx.geometry.Bounds;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Ellipse;
 import javafx.scene.shape.Polyline;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
+import javafx.scene.shape.StrokeType;
 
 public class Level implements Serializable {
 	private int levelNumber;
@@ -16,6 +18,8 @@ public class Level implements Serializable {
 	private ArrayList<Integer> enemyPathType;
 	private ArrayList<Double> enemyPathPoints;
 	private ArrayList<Integer> firstIndexofEachEnemyPath;
+	private ArrayList<Double> enemyMoveDuration;
+	private ArrayList<Double> enemyPathRotation;
 	private ArrayList<Vector2> posWalls;
 	private ArrayList<Double> wallPoints;
 	private ArrayList<Integer> firstIndexofEachWall;
@@ -38,12 +42,17 @@ public class Level implements Serializable {
 		this.enemyPathPoints = new ArrayList<Double>();
 		this.enemyPathType = new ArrayList<Integer>();
 		this.firstIndexofEachEnemyPath = new ArrayList<Integer>();
+		this.enemyMoveDuration = new ArrayList<Double>();
+		this.enemyPathRotation = new ArrayList<Double>();
 		
 		for(int i = 0; i < enemies.size(); i ++) {
 			Vector2 pos = new Vector2(enemies.get(i).getIniX(), enemies.get(i).getIniY());
 			this.posEnemies.add(i, pos);
 			
+			this.enemyMoveDuration.add(i, enemies.get(i).getMoveDuration());
+			
 			Shape enePath = enemies.get(i).getPath();
+			this.enemyPathRotation.add(enePath.getRotate());
 			int index = 0;
 			if(i != 0) {
 				Shape previousEnePath = enemies.get(i - 1).getPath();
@@ -68,7 +77,7 @@ public class Level implements Serializable {
 			}
 			
 			this.firstIndexofEachEnemyPath.add(i,index);
-			
+			System.out.println(enePath.getClass().getName());
 			switch(enePath.getClass().getName()) {
 				case "javafx.scene.shape.Rectangle":
 					this.enemyPathType.add(i, ShapeTypes.RECTANGLE);
@@ -77,7 +86,7 @@ public class Level implements Serializable {
 					this.enemyPathPoints.add(this.firstIndexofEachEnemyPath.get(i) + 1,path.getHeight());
 					break;
 				case "javafx.scene.shape.Circle":
-					this.enemyPathType.add(i, ShapeTypes.RECTANGLE);
+					this.enemyPathType.add(i, ShapeTypes.CIRCLE);
 					Circle path2 = (Circle) enemies.get(i).getPath();
 					this.enemyPathPoints.add(this.firstIndexofEachEnemyPath.get(i),path2.getRadius());
 					break;
@@ -120,8 +129,10 @@ public class Level implements Serializable {
 		}
 		
 		for(int i = 0; i < checkpoints.size(); i++) {
-			Vector2 pos = new Vector2 (checkpoints.get(i).iniX, checkpoints.get(i).iniY);
-			Vector2 bounds = new Vector2(checkpoints.get(i).getShape().getScaleX(),checkpoints.get(i).getShape().getScaleY());
+			Vector2 pos = new Vector2 (checkpoints.get(i).getIniX(), checkpoints.get(i).getIniY());
+			Shape checkShape = checkpoints.get(i).getShape();
+			Bounds checkBounds = checkShape.localToScene(checkShape.getBoundsInLocal());
+			Vector2 bounds = new Vector2(checkBounds.getMaxX() - checkBounds.getMinX(), checkBounds.getMaxY() - checkBounds.getMinY());
 			this.posCheckpoints.add(i,pos);
 			this.checkPointBounds.add(i,bounds);
 		}
@@ -137,7 +148,7 @@ public class Level implements Serializable {
 	
 
 	public Player getPlayer() {
-		Rectangle rect = new Rectangle(50,50);
+		Rectangle rect = new Rectangle(30,30);
 		return new Player(rect,this.posPlayer.getPosX(), this.posPlayer.getPosY(),this.numberOfDeaths);
 	}
 
@@ -150,32 +161,38 @@ public class Level implements Serializable {
 	}
 	
 	public ArrayList<Enemy> getEnemies(){
-		Circle circ = new Circle(0,0,15);
 		ArrayList<Enemy> enemies = new ArrayList<Enemy>();
 		double x = 0;
 		double y = 0;
+		double moveDuration = 0;
 		
 		for(int i = 0; i < posEnemies.size(); i++) {
+			Circle circ = new Circle(0,0,12.5);
 			x = posEnemies.get(i).getPosX();
 		    y = posEnemies.get(i).getPosY();
+		    moveDuration = enemyMoveDuration.get(i);
 			circ.setCenterX(x);
 			circ.setCenterY(y);
 			circ.setFill(Color.DARKBLUE);
 			circ.setStroke(Color.BLACK);
 			
-			Enemy enemy = new Enemy(circ,null,x,y);
+			Enemy enemy = new Enemy(circ,null,x,y,moveDuration);
 			int dataPos = this.firstIndexofEachEnemyPath.get(i);
+			System.out.println(this.enemyPathType.get(i));
 			switch(this.enemyPathType.get(i)) {
 				case ShapeTypes.RECTANGLE:
-					Rectangle path1 = new Rectangle(this.enemyPathPoints.get(dataPos), this.enemyPathPoints.get(dataPos + 1));
+					Rectangle path1 = new Rectangle(x,y,this.enemyPathPoints.get(dataPos), this.enemyPathPoints.get(dataPos + 1));
+					path1.setRotate(enemyPathRotation.get(i));
 					enemy.setPath(path1);
 					break;
 				case ShapeTypes.CIRCLE:
-					Circle path2 = new Circle(this.enemyPathPoints.get(dataPos));
+					Circle path2 = new Circle(x,y,this.enemyPathPoints.get(dataPos));
+					path2.setRotate(enemyPathRotation.get(i));
 					enemy.setPath(path2);
 					break;
 				case ShapeTypes.ELLIPSE:
-					Ellipse path3 = new Ellipse(this.enemyPathPoints.get(dataPos),this.enemyPathPoints.get(dataPos + 1));
+					Ellipse path3 = new Ellipse(x,y,this.enemyPathPoints.get(dataPos),this.enemyPathPoints.get(dataPos + 1));
+					path3.setRotate(enemyPathRotation.get(i));
 					enemy.setPath(path3);
 					break;
 				case ShapeTypes.POLYLINE:
@@ -197,7 +214,10 @@ public class Level implements Serializable {
 					
 			}
 			
+			
 			enemies.add(enemy);
+			enemies.get(i).getShape().setLayoutX(enemies.get(i).getShape().getLayoutX() - 12.5);
+			enemies.get(i).getShape().setLayoutY(enemies.get(i).getShape().getLayoutY() - 12.5);
 		}
 		
 		return enemies;
@@ -240,7 +260,10 @@ public class Level implements Serializable {
 		    }
 		    
 		    Polyline pol = new Polyline(pointAdapter);
+		    pol.setStrokeWidth(10);
 		    walls.add(new Wall(pol,x,y));
+		    walls.get(i).getShape().setLayoutX(0);
+		    walls.get(i).getShape().setLayoutY(0);
 		}
 		
 		return walls;
@@ -271,7 +294,6 @@ public class Level implements Serializable {
 	}
 	
 	public ArrayList<Coin> getCoins() {
-		Circle circ = new Circle(0,0,25);
 		ArrayList<Coin> coins = new ArrayList<Coin>();
 		double x = 0;
 		double y = 0;
@@ -279,11 +301,12 @@ public class Level implements Serializable {
 		for(int i = 0; i < posCoins.size(); i++) {
 			x = posCoins.get(i).getPosX();
 		    y = posCoins.get(i).getPosY();
-			circ.setCenterX(x);
-			circ.setCenterY(y);
+		    Circle circ = new Circle(x,y,12.5);
 			circ.setFill(Color.GOLD);
 			Coin coin = new Coin(circ,x,y);
 			coins.add(coin);
+			coins.get(i).getShape().setLayoutX(coins.get(i).getShape().getLayoutX() - 12.5);
+			coins.get(i).getShape().setLayoutY(coins.get(i).getShape().getLayoutY() - 12.5);
 		}
 		
 		return coins;
@@ -310,10 +333,6 @@ public class Level implements Serializable {
 	}
 	
 	public ArrayList<CheckPoint> getCheckPoints() {
-		Rectangle rect = new Rectangle(0,0);
-		rect.setFill(Color.DARKSEAGREEN);
-		rect.setStroke(Color.DARKGREEN);
-		rect.setOpacity(0.5);
 		ArrayList<CheckPoint> checkpoints = new ArrayList<CheckPoint>();
 		CheckPoint check;
 		double x = 0;
@@ -327,8 +346,10 @@ public class Level implements Serializable {
 			w = checkPointBounds.get(i).getPosX();
 			h = checkPointBounds.get(i).getPosY();
 			
-			rect.setWidth(w);
-			rect.setHeight(h);
+			Rectangle rect = new Rectangle(x,y,w,h);
+			rect.setFill(Color.DARKSEAGREEN);
+			rect.setStroke(Color.DARKGREEN);
+			rect.setOpacity(0.5);
 			
 			if(i == 0) {
 				check = new CheckPoint(rect,x,y,false,true);
@@ -339,8 +360,8 @@ public class Level implements Serializable {
 			else {
 				check = new CheckPoint(rect,x,y,false,false);
 			}
-			
-			checkpoints.add(check);
+			Bounds rectBounds = rect.localToScene(rect.getBoundsInLocal());
+			checkpoints.add(i,check);
 		}
 		return checkpoints;
 	}
